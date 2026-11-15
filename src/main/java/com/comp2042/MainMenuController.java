@@ -3,7 +3,6 @@ package com.comp2042;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.ChoiceBox;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
@@ -13,7 +12,7 @@ public class MainMenuController {
 
     private static final int X_VALUE = 20;
     private static final int Y_VALUE = 20;
-    private static final boolean POWER_UP = true;
+    private static final boolean POWER_UP = false;
     private static final char DIFFICULTY = 'N';
 
     @FXML private ChoiceBox<SnakeSkin> skinPicker;
@@ -30,15 +29,10 @@ public class MainMenuController {
     private void drawSkinPreview() {
         var gc = skinPreview.getGraphicsContext2D();
         gc.clearRect(0, 0, skinPreview.getWidth(), skinPreview.getHeight());
-        SnakeSkin skin = skinPicker.getValue();
-        double size = 48;
-        gc.save();
-        gc.translate(34, 18);
-        gc.rotate(90);
-        gc.drawImage(skin.image(SnakeSkin.Part.TAIL), 0, -size, size, size);
-        gc.drawImage(skin.image(SnakeSkin.Part.BODY), 0, -size * 2, size, size);
-        gc.drawImage(skin.image(SnakeSkin.Part.BODY), 0, -size * 3, size, size);
-        gc.drawImage(skin.image(SnakeSkin.Part.HEAD), 0, -size * 4, size, size);
+        gc.save(); gc.translate(24, 10);
+        skinPicker.getValue().drawConnected(gc, java.util.List.of(
+                new java.awt.Point(0, 0), new java.awt.Point(1, 0),
+                new java.awt.Point(2, 0), new java.awt.Point(3, 0)), 90, 52);
         gc.restore();
     }
 
@@ -66,16 +60,22 @@ public class MainMenuController {
         GameController controller = new GameController(snek, coin, game, gameView, obstacle, gameStage);
 
         StackPane gamePane = new StackPane();
-        gameScene = new Scene(gamePane, game.getWidth() * game.getMultiplier(), game.getHeight() * game.getMultiplier());
+        gameScene = new Scene(gamePane, game.getWidth() * game.getMultiplier(), game.getHeight() * game.getMultiplier() + 56);
 
         gameScene.setOnKeyPressed(controller::handle);
 
         gameView.makeScene(gameScene, snek, coin);
-        gamePane.getChildren().addAll(gameView.gridCanvas, gameView.gameOverLabel, gameView.gameWonLabel, gameView.scoreLabel);
-        gamePane.setPadding(new Insets(20));
-        gamePane.setAlignment(gameView.gameOverLabel, Pos.TOP_CENTER);
-        gamePane.setAlignment(gameView.gameWonLabel, Pos.TOP_CENTER);
-        gamePane.setAlignment(gameView.scoreLabel, Pos.BOTTOM_CENTER);
+        gameScene.getStylesheets().add("resources/views/styling.css");
+        javafx.scene.layout.HBox hud = new javafx.scene.layout.HBox(20, gameView.scoreLabel, gameView.hintLabel);
+        hud.setAlignment(Pos.CENTER); hud.setPrefHeight(56); hud.setId("gameHud");
+        StackPane board = new StackPane(gameView.gridCanvas, gameView.endPanel);
+        javafx.scene.layout.BorderPane layout = new javafx.scene.layout.BorderPane(board);
+        layout.setTop(hud);
+        gamePane.getChildren().add(layout);
+        gameView.tryAgainButton.setOnAction(event -> controller.restart());
+        gameView.menuButton.setOnAction(event -> controller.returnToMenu());
+        gameStage.setOnHidden(event -> controller.stop());
+        gameView.gridCanvas.setFocusTraversable(true);
     }
 
     public ViewManager getViewManager() {

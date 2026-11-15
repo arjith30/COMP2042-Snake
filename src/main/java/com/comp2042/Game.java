@@ -3,7 +3,7 @@ package com.comp2042;
 import javafx.scene.paint.Color;
 
 public class Game {
-    private Color color = Color.web("feffe4");
+    private Color color = Color.web("#a3d56b");
     private int width;
     private int height;
     private int score;
@@ -28,12 +28,12 @@ public class Game {
         this.powerUp = powerUp;
         width = x;
         height = y;
-        maxScore = x * y - 2;
+        maxScore = x * y - 4;
         this.powerUp = powerUp;
         if (height > 50) {
             multiplier = 10;
         } else {
-            multiplier = 20;
+            multiplier = 32;
         }
     }
 
@@ -60,6 +60,7 @@ public class Game {
     public void resetScore() {
         score = 0;
         scorePoints = 0;
+        maxScore = width * height - 4;
     }
 
     public Color getColor() {
@@ -73,6 +74,8 @@ public class Game {
     public void addPoints(int n) {
         scorePoints += n;
     }
+
+    public int getScore() { return score; }
 
     public int getScorePoints() {
         return scorePoints;

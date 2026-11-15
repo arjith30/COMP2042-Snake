@@ -1,212 +1,104 @@
 package com.comp2042;
 
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
-import javafx.scene.input.KeyCode;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-
-import java.awt.*;
+import java.awt.Point;
 
 public class GameView {
-
     public Canvas gridCanvas;
     public GraphicsContext gc;
-
-    public Label gameOverLabel;
-    public Label gameWonLabel;
-    public Label scoreLabel;
-    private boolean gameOverVis = false;
-    private boolean gameWonVis = false;
-
-    private Game game;
-    private double initX;
-    private double initY;
+    public Label gameOverLabel, gameWonLabel, scoreLabel, hintLabel;
+    public Button tryAgainButton, menuButton;
+    public VBox endPanel;
+    private final Game game;
     private double fullScale = 1;
-    private boolean fullsize = false;
-    private int[][] turnArray = new int[MainMenuController.getxValue()][MainMenuController.getyValue()];
 
-    public GameView(Game game) {
-        this.game = game;
-    }
+    public GameView(Game game) { this.game = game; }
 
-    public void makeScene(Scene scene, Snake snek, Coin coin) {
-        Scene gameScene = scene;
-        gridCanvas = new Canvas(gameScene.getWidth(), gameScene.getHeight());
-        initX = scene.getWidth();
-        initY = scene.getHeight();
+    public void makeScene(Scene scene, Snake snake, Coin apple) {
+        gridCanvas = new Canvas(game.getWidth() * game.getMultiplier(), game.getHeight() * game.getMultiplier());
         gc = gridCanvas.getGraphicsContext2D();
-        drawGrid(coin, snek, gc);
-
         gameOverLabel = new Label("GAME OVER");
-        gameOverLabel.setId("gameOverLabel");
-        String css = "resources/views/styling.css";
-        gameOverLabel.getStylesheets().add(css);
-        gameOverLabel.setVisible(false);
-
         gameWonLabel = new Label("YOU WON!");
-        gameWonLabel.setId("gameWonLabel");
-        gameWonLabel.getStylesheets().add(css);
-        gameWonLabel.setVisible(false);
-
-        scoreLabel = new Label("Score: " + game.getScorePoints());
-        scoreLabel.setId("scoreLabel");
-        scoreLabel.getStylesheets().add(css);
-        scoreLabel.setFont(new Font("Arial", 20));
-        scoreLabel.setVisible(true);
+        gameOverLabel.setId("gameOverLabel"); gameWonLabel.setId("gameWonLabel");
+        gameOverLabel.setVisible(false); gameOverLabel.setManaged(false);
+        gameWonLabel.setVisible(false); gameWonLabel.setManaged(false);
+        scoreLabel = new Label(); scoreLabel.setId("scoreLabel");
+        hintLabel = new Label("Arrow keys to move  •  P to pause  •  Esc for skins");
+        hintLabel.setId("hintLabel");
+        tryAgainButton = new Button("Try Again"); tryAgainButton.setId("tryAgainButton");
+        menuButton = new Button("Choose Skin"); menuButton.setId("chooseSkinButton");
+        // Buttons never steal the arrow keys needed to steer after restarting.
+        tryAgainButton.setFocusTraversable(false); menuButton.setFocusTraversable(false);
+        Label message = new Label("Another apple adventure?"); message.setId("endMessage");
+        endPanel = new VBox(16, gameOverLabel, gameWonLabel, message, tryAgainButton, menuButton);
+        endPanel.setAlignment(Pos.CENTER); endPanel.setMaxSize(330, 300);
+        endPanel.setId("endPanel"); endPanel.setVisible(false); endPanel.setManaged(false);
+        updateScoreLabel(); drawGrid(apple, snake, gc);
     }
 
-    public void scaleToFullscreen(boolean fullScreen, Stage primaryStage, Obstacle obstacle, Snake snek, Coin coin) {
-        primaryStage.setFullScreen(fullScreen);
+    public void scaleToFullscreen(boolean fullscreen, Stage stage, Obstacle obstacle, Snake snake, Coin apple) {
+        stage.setFullScreen(fullscreen);
+        fullScale = fullscreen ? Math.min(
+                (Screen.getPrimary().getVisualBounds().getWidth() - 32) / (game.getWidth() * game.getMultiplier()),
+                (Screen.getPrimary().getVisualBounds().getHeight() - 100) / (game.getHeight() * game.getMultiplier())) : 1;
+        gridCanvas.setWidth(game.getWidth() * game.getMultiplier() * fullScale);
+        gridCanvas.setHeight(game.getHeight() * game.getMultiplier() * fullScale);
+        drawGrid(apple, snake, obstacle, gc, false, 0);
+    }
 
-        double xScaling = Screen.getPrimary().getVisualBounds().getHeight() / initY;
-        double yScaling = Screen.getPrimary().getVisualBounds().getWidth() / initX;
+    public void drawGrid(Coin apple, Snake snake, Obstacle obstacle, GraphicsContext context, boolean unused, int ignored) {
+        drawGrid(apple, snake, context);
+        double tile = game.getMultiplier() * fullScale;
+        context.setFill(Color.web("#486745"));
+        for (Point point : obstacle.getObstacles())
+            context.fillRoundRect(point.x * tile + 2, point.y * tile + 2, tile - 4, tile - 4, 10, 10);
+    }
 
-        if (fullScreen && !fullsize) {
-            if (xScaling < yScaling) {
-                fullScale = xScaling;
-            } else {
-                fullScale = yScaling;
+    private void drawGrid(Coin apple, Snake snake, GraphicsContext context) {
+        double tile = game.getMultiplier() * fullScale;
+        drawGrass(context, game.getWidth(), game.getHeight(), tile);
+        context.drawImage(apple.getImage(), apple.getPos().x * tile, apple.getPos().y * tile, tile, tile);
+        snake.getSkin().drawSnake(context, snake, tile);
+    }
+
+    public static void drawGrass(GraphicsContext g, int columns, int rows, double tile) {
+        for (int y = 0; y < rows; y++) for (int x = 0; x < columns; x++) {
+            g.setFill(Color.web((x + y) % 2 == 0 ? "#a3d56b" : "#98cb60"));
+            g.fillRect(x * tile, y * tile, tile, tile);
+            // Deterministic sparse tufts stay still while the snake moves.
+            if ((x * 7 + y * 11) % 5 == 0) {
+                double px = (x + .23) * tile, py = (y + .78) * tile;
+                g.setStroke(Color.web("#6ba64b", .36)); g.setLineWidth(Math.max(1, tile * .035));
+                g.strokeLine(px, py, px - tile * .07, py - tile * .12);
+                g.strokeLine(px, py, px + tile * .05, py - tile * .16);
             }
-            gridCanvas.setWidth(gridCanvas.getWidth() * fullScale);
-            gridCanvas.setHeight(gridCanvas.getHeight() * fullScale);
-            fullsize = true;
-        } else if (!fullScreen) {
-            fullScale = 1;
-            gridCanvas.setWidth(initX);
-            gridCanvas.setHeight(initY);
-            fullsize = false;
-        }
-
-        gameOverLabel.setFont(new Font("Arial", 25 * fullScale));
-        gameWonLabel.setFont(new Font("Arial", 25 * fullScale));
-        drawGrid(coin, snek, obstacle, gc, false, 0);
-    }
-
-    public void drawGrid(Coin coin, Snake snek, Obstacle obstacle, GraphicsContext gc, boolean a, int b) {
-        gc.setFill(game.getColor());
-        gc.fillRect(0, 0, gridCanvas.getWidth(), gridCanvas.getHeight());
-
-        gc.drawImage(coin.getImage(), (coin.getPos().x * game.getMultiplier()) * fullScale, (coin.getPos().y * game.getMultiplier()) * fullScale, game.getMultiplier() * fullScale - 3 * fullScale, game.getMultiplier() * fullScale - 3 * fullScale);
-
-        int bodyIndex = 0;
-        for (Point point : snek.getBody()) {
-            drawBody(snek, point, bodyIndex);
-            bodyIndex++;
-        }
-
-        drawHead(snek);
-
-        gc.setFill(obstacle.getColor());
-        for (Point point : obstacle.getObstacles()) {
-            gc.fillRect(point.x * game.getMultiplier() * fullScale, point.y * game.getMultiplier() * fullScale, game.getMultiplier() * fullScale, game.getMultiplier() * fullScale);
         }
     }
 
-    private void drawGrid(Coin coin, Snake snek, GraphicsContext gc) {
-        gc.setFill(game.getColor());
-        gc.fillRect(0, 0, gridCanvas.getWidth(), gridCanvas.getHeight());
-
-        gc.drawImage(coin.getImage(), (coin.getPos().x * game.getMultiplier()) * fullScale, (coin.getPos().y * game.getMultiplier()) * fullScale, game.getMultiplier() * fullScale - 3 * fullScale, game.getMultiplier() * fullScale - 3 * fullScale);
-
-        int bodyIndex = 0;
-        for (Point point : snek.getBody()) {
-            drawBody(snek, point, bodyIndex);
-            bodyIndex++;
-        }
-
-        drawHead(snek);
+    public void gameOver(Snake snake) {
+        gameOverLabel.setVisible(snake.getDead()); gameOverLabel.setManaged(snake.getDead());
+        updateEndPanel();
     }
-
-    private void drawHead(Snake snek) {
-        snek.getImageViewHead().setRotate(snek.getSnakeDir());
-        SnapshotParameters params = new SnapshotParameters();
-        params.setFill(Color.TRANSPARENT);
-        Image rotatedImage = snek.getImageViewHead().snapshot(params, null);
-        gc.drawImage(rotatedImage, (snek.getHead().x * game.getMultiplier()) * fullScale, (snek.getHead().y * game.getMultiplier()) * fullScale, game.getMultiplier() * fullScale, game.getMultiplier() * fullScale);
-    }
-
-    private void drawBody(Snake snek, Point point, int index) {
-        Image rotatedImage;
-        if (snek.getBody().size() <= 1) {
-            snek.getImageViewTail().setRotate(snek.getSnakeDir());
-            SnapshotParameters params = new SnapshotParameters();
-            params.setFill(Color.TRANSPARENT);
-            rotatedImage = snek.getImageViewTail().snapshot(params, null);
-        } else if (index == 0) {
-            int rotateTail;
-            if (snek.getBody().get(1).getX() == snek.getBody().get(0).getX() && snek.getBody().get(1).getY() == snek.getBody().get(0).getY() - 1) {
-                rotateTail = 0;
-            } else if (snek.getBody().get(1).getX() == snek.getBody().get(0).getX() && snek.getBody().get(1).getY() == snek.getBody().get(0).getY() + 1) {
-                rotateTail = 180;
-            } else if (snek.getBody().get(1).getX() == snek.getBody().get(0).getX() - 1 && snek.getBody().get(1).getY() == snek.getBody().get(0).getY()) {
-                rotateTail = 270;
-            } else {
-                rotateTail = 90;
-            }
-            snek.getImageViewTail().setRotate(rotateTail);
-            SnapshotParameters params = new SnapshotParameters();
-            params.setFill(Color.TRANSPARENT);
-            rotatedImage = snek.getImageViewTail().snapshot(params, null);
-        } else if (index > 0 && (turnArray[(int) snek.getBody().get(index).getX()][(int) snek.getBody().get(index).getY()] != 0)) {
-            snek.getImageViewTurn().setRotate(90 * turnArray[(int) snek.getBody().get(index).getX()][(int) snek.getBody().get(index).getY()]);
-            SnapshotParameters params = new SnapshotParameters();
-            params.setFill(Color.TRANSPARENT);
-            rotatedImage = snek.getImageViewTurn().snapshot(params, null);
-        } else {
-            snek.getImageViewBody().setRotate(snek.getBodyDir(index));
-            SnapshotParameters params = new SnapshotParameters();
-            params.setFill(Color.TRANSPARENT);
-            rotatedImage = snek.getImageViewBody().snapshot(params, null);
-        }
-
-        if (turnArray[(int) snek.getBody().get(0).getX()][(int) snek.getBody().get(0).getY()] != 0) {
-            turnArray[(int) snek.getBody().get(0).getX()][(int) snek.getBody().get(0).getY()] = 0;
-        }
-
-        gc.drawImage(rotatedImage, (point.x * game.getMultiplier()) * fullScale, (point.y * game.getMultiplier()) * fullScale, game.getMultiplier() * fullScale, game.getMultiplier() * fullScale);
-    }
-
-    public void turnDir(Snake snek) {
-        if ((GameController.lastKey == KeyCode.LEFT && GameController.key == KeyCode.UP) || (GameController.lastKey == KeyCode.DOWN && GameController.key == KeyCode.RIGHT)) {
-            turnArray[(int) snek.getHead().getX()][(int) snek.getHead().getY()] = 2;
-        } else if ((GameController.lastKey == KeyCode.LEFT && GameController.key == KeyCode.DOWN) || (GameController.lastKey == KeyCode.UP && GameController.key == KeyCode.RIGHT)) {
-            turnArray[(int) snek.getHead().getX()][(int) snek.getHead().getY()] = 3;
-        } else if ((GameController.lastKey == KeyCode.RIGHT && GameController.key == KeyCode.UP) || (GameController.lastKey == KeyCode.DOWN && GameController.key == KeyCode.LEFT)) {
-            turnArray[(int) snek.getHead().getX()][(int) snek.getHead().getY()] = 1;
-        } else if ((GameController.lastKey == KeyCode.UP && GameController.key == KeyCode.LEFT) || (GameController.lastKey == KeyCode.RIGHT && GameController.key == KeyCode.DOWN)) {
-            turnArray[(int) snek.getHead().getX()][(int) snek.getHead().getY()] = 4;
-        } else turnArray[(int) snek.getHead().getX()][(int) snek.getHead().getY()] = 0;
-    }
-
-    public void gameOver(Snake snek) {
-        if (snek.getDead() && !gameOverVis) {
-            gameOverVis = true;
-            gameOverLabel.setVisible(true);
-        } else if (!snek.getDead() && gameOverVis) {
-            gameOverLabel.setVisible(false);
-            gameOverVis = false;
-        }
-    }
-
     public void gameWon() {
-        if (game.gameWon() && !gameWonVis) {
-            gameWonVis = true;
-            gameWonLabel.setVisible(true);
-        } else if (!game.gameWon() && gameWonVis) {
-            gameWonVis = false;
-            gameWonLabel.setVisible(false);
-        }
+        gameWonLabel.setVisible(game.gameWon()); gameWonLabel.setManaged(game.gameWon());
+        updateEndPanel();
     }
-
+    private void updateEndPanel() {
+        boolean show = gameOverLabel.isVisible() || gameWonLabel.isVisible();
+        endPanel.setVisible(show); endPanel.setManaged(show);
+        if (show) hintLabel.setText("Try again or choose another skin");
+    }
     public void updateScoreLabel() {
-        scoreLabel.setText("Score: " + game.getScorePoints());
+        scoreLabel.setText("Apples: " + game.getScore() + "    Score: " + game.getScorePoints());
     }
-
+    public void showReady() { hintLabel.setText("Arrow keys to move  •  P to pause  •  Esc for skins"); }
 }

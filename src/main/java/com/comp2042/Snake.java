@@ -37,7 +37,8 @@ public class Snake {
         this.obstacle = obstacle;
         this.noBorder = noBorder;
         this.head.setLocation(x / 2, y / 2);
-        this.body.add(new Point(x / 2 + 1, y / 2));
+        for (int offset = 3; offset >= 1; offset--)
+            this.body.add(new Point(x / 2 + offset, y / 2));
         this.gx = x;
         this.gy = y;
     }

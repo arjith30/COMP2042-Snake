@@ -76,3 +76,54 @@
     -fx-border-radius: 6;
     -fx-background-radius: 6;
 }
+
+#gameHud {
+    -fx-background-color: #274b32;
+    -fx-padding: 10 14;
+}
+#scoreLabel {
+    -fx-font-family: "Arial";
+    -fx-font-size: 18;
+    -fx-font-weight: bold;
+    -fx-text-fill: #fff4cf;
+}
+#hintLabel {
+    -fx-font-family: "Arial";
+    -fx-font-size: 12;
+    -fx-text-fill: #d7edc7;
+}
+#endPanel {
+    -fx-background-color: rgba(255, 250, 228, 0.97);
+    -fx-background-radius: 24;
+    -fx-border-color: #416a39;
+    -fx-border-width: 3;
+    -fx-border-radius: 24;
+    -fx-padding: 26;
+    -fx-effect: dropshadow(gaussian, rgba(22, 50, 23, 0.35), 24, 0, 0, 7);
+}
+#endPanel .label {
+    -fx-font-family: "Arial";
+    -fx-font-size: 28;
+    -fx-font-weight: bold;
+    -fx-text-fill: #274b32;
+}
+#endPanel #endMessage {
+    -fx-font-size: 16;
+    -fx-font-weight: normal;
+}
+#endPanel .button {
+    -fx-font-family: "Arial";
+    -fx-font-size: 19;
+    -fx-font-weight: bold;
+    -fx-background-image: none;
+    -fx-background-color: #307944;
+    -fx-background-radius: 12;
+    -fx-padding: 12 30;
+    -fx-cursor: hand;
+}
+#endPanel .button:hover { -fx-background-color: #246337; }
+#endPanel #chooseSkinButton {
+    -fx-background-color: #e3edcf;
+    -fx-text-fill: #274b32;
+    -fx-font-size: 15;
+}
