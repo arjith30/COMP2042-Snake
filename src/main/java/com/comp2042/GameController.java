@@ -138,7 +138,7 @@ public class GameController {
         animation.jumpTo(Duration.ZERO);
         animation.stop();
 
-        snek = new Snake(game.getWidth(), game.getHeight(), game.isNoBorder(), obstacle);
+        snek = new Snake(game.getWidth(), game.getHeight(), game.isNoBorder(), obstacle, snek.getSkin());
         coin = new Coin(game.getWidth(), game.getHeight(), snek, obstacle);
 
         int unusedObstacleCount = new Random().nextInt(game.getWidth() * game.getHeight() / 20) + 3;

@@ -64,3 +64,15 @@
     -fx-font-family: "SF Pixelate";
     -fx-font-size: 20;
 }
+
+/* Keep the menu's large title typography out of the skin selector. */
+.choice-box .label {
+    -fx-font-family: "SF Pixelate";
+    -fx-font-size: 16;
+}
+.choice-box {
+    -fx-background-color: #fff4dc;
+    -fx-border-color: #b87431;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+}

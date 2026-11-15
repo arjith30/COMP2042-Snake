@@ -1,6 +1,5 @@
 package com.comp2042;
 
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 
@@ -8,8 +7,8 @@ import java.awt.*;
 import java.util.ArrayList;
 
 public class Snake {
-    private Color headColor = Color.web("2eb872");
-    private Color bodyColor = Color.web("a3de83");
+    private Color headColor = Color.web("#ff8a18");
+    private Color bodyColor = Color.web("#ffad32");
     private boolean dead = false;
     private final Point head = new Point();
     private final ArrayList<Point> body = new ArrayList<>();
@@ -18,23 +17,33 @@ public class Snake {
     private boolean ignoreBorders = false;
     private boolean noBorder;
     private Obstacle obstacle;
-    private Image imgInputHead = new Image("resources/views/res/snakehead.png");
-    private ImageView imageHead = new ImageView(imgInputHead);
-    private Image imgInputBody = new Image("resources/views/res/snakebody.png");
-    private ImageView imageBody = new ImageView(imgInputBody);
-    private Image imgInputTurn = new Image("resources/views/res/snaketurnleft.png");
-    private ImageView imageTurn = new ImageView(imgInputTurn);
-    private Image imgInputTail = new Image("resources/views/res/snaketail.png");
-    private ImageView imageTail = new ImageView(imgInputTail);
+    private final SnakeSkin skin;
+    private final ImageView imageHead;
+    private final ImageView imageBody;
+    private final ImageView imageTurn;
+    private final ImageView imageTail;
     private int snakeDir = 270;
 
     public Snake(int x, int y, boolean noBorder, Obstacle obstacle) {
+        this(x, y, noBorder, obstacle, SnakeSkin.ORANGE);
+    }
+
+    public Snake(int x, int y, boolean noBorder, Obstacle obstacle, SnakeSkin skin) {
+        this.skin = skin;
+        imageHead = new ImageView(skin.image(SnakeSkin.Part.HEAD));
+        imageBody = new ImageView(skin.image(SnakeSkin.Part.BODY));
+        imageTurn = new ImageView(skin.image(SnakeSkin.Part.TURN));
+        imageTail = new ImageView(skin.image(SnakeSkin.Part.TAIL));
         this.obstacle = obstacle;
         this.noBorder = noBorder;
         this.head.setLocation(x / 2, y / 2);
         this.body.add(new Point(x / 2 + 1, y / 2));
         this.gx = x;
         this.gy = y;
+    }
+
+    public SnakeSkin getSkin() {
+        return skin;
     }
 
     public void move(char dir) {
