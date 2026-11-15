@@ -16,3 +16,7 @@ All five skins use transparent, cached 128px sprites drawn with JavaFX, includin
 ## Development
 
 The project currently depends on JavaFX 25.0.1, which requires JDK 23 or later at runtime. Run `mvn package` and `mvn javafx:run` with a compatible JDK. This change preserves the existing dependency versions.
+
+## Run without installing Maven
+
+Install JDK 25, then run `git pull` and `bash ./mvnw javafx:run` in the project directory (Git Bash / MSYS2, Linux or macOS). The wrapper downloads Maven 3.9.9 automatically the first time. In Windows PowerShell, use `.\mvnw.cmd javafx:run`; `JAVA_HOME` must point to your JDK folder.
