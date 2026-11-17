@@ -17,6 +17,8 @@ public class GameView {
     public Label gameOverLabel, gameWonLabel, scoreLabel, hintLabel;
     public Button tryAgainButton, menuButton, fullscreenButton;
     public VBox endPanel;
+    private LeaderboardView leaderboard;
+    private Label endMessage;
     private final Game game;
     private double fullScale = 1;
     private Snake displayedSnake;
@@ -42,9 +44,10 @@ public class GameView {
         menuButton = new Button("Choose Skin"); menuButton.setId("chooseSkinButton");
         // Buttons never steal the arrow keys needed to steer after restarting.
         tryAgainButton.setFocusTraversable(false); menuButton.setFocusTraversable(false);
-        Label message = new Label("Another apple adventure?"); message.setId("endMessage");
-        endPanel = new VBox(16, gameOverLabel, gameWonLabel, message, tryAgainButton, menuButton);
-        endPanel.setAlignment(Pos.CENTER); endPanel.setMaxSize(330, 300);
+        endMessage = new Label("Your score: 0"); endMessage.setId("endMessage");
+        leaderboard = new LeaderboardView();
+        endPanel = new VBox(10, gameOverLabel, gameWonLabel, endMessage, leaderboard, tryAgainButton, menuButton);
+        endPanel.setAlignment(Pos.CENTER); endPanel.setMaxSize(360, javafx.scene.layout.Region.USE_PREF_SIZE);
         endPanel.setId("endPanel"); endPanel.setVisible(false); endPanel.setManaged(false);
         updateScoreLabel(); drawGrid(apple, snake, gc);
     }
@@ -110,6 +113,10 @@ public class GameView {
         boolean show = gameOverLabel.isVisible() || gameWonLabel.isVisible();
         endPanel.setVisible(show); endPanel.setManaged(show);
         if (show) hintLabel.setText("Enter to try again  •  Esc for skins");
+    }
+    public void refreshLeaderboard() {
+        leaderboard.refresh();
+        endMessage.setText("Your score: " + game.getScorePoints() + "  •  Apples: " + game.getScore());
     }
     public void updateScoreLabel() {
         scoreLabel.setText("Apples: " + game.getScore() + "    Score: " + game.getScorePoints());

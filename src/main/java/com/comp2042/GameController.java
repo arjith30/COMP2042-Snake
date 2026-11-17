@@ -18,6 +18,7 @@ public class GameController {
     public static KeyCode key = KeyCode.LEFT;
     public static KeyCode lastKey = KeyCode.LEFT;
     private boolean keyPressed;
+    private boolean scoreRecorded;
     private final Timeline animation;
 
     public GameController(Snake snake, Coin apple, Game game, GameView view, Obstacle obstacle, Stage stage) {
@@ -38,6 +39,11 @@ public class GameController {
         }
         keyPressed = false;
         gameView.drawGrid(coin, snek, obstacle, gameView.gc, false, 0);
+        if ((snek.getDead() || game.gameWon()) && !scoreRecorded) {
+            scoreRecorded = true;
+            Leaderboard.local().record(game.getScorePoints());
+            gameView.refreshLeaderboard();
+        }
         gameView.updateScoreLabel(); gameView.gameOver(snek); gameView.gameWon();
         if (snek.getDead() || game.gameWon()) animation.stop();
     }
@@ -93,7 +99,7 @@ public class GameController {
         obstacle.reset(); game.resetScore();
         snek = new Snake(game.getWidth(), game.getHeight(), game.isNoBorder(), obstacle, snek.getSkin());
         coin = new Coin(game.getWidth(), game.getHeight(), snek, obstacle);
-        key = lastKey = KeyCode.LEFT; keyPressed = false;
+        key = lastKey = KeyCode.LEFT; keyPressed = false; scoreRecorded = false;
         animation.setRate(game.getSpeed());
         gameView.gameOver(snek); gameView.gameWon(); gameView.updateScoreLabel(); gameView.showReady();
         gameView.drawGrid(coin, snek, obstacle, gameView.gc, false, 0);

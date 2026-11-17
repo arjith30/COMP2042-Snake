@@ -17,14 +17,20 @@ public class MainMenuController {
 
     @FXML private ChoiceBox<SnakeSkin> skinPicker;
     @FXML private Canvas skinPreview;
+    @FXML private javafx.scene.layout.VBox leaderboardContainer;
+    private LeaderboardView leaderboard;
 
     @FXML
     private void initialize() {
+        leaderboard = new LeaderboardView();
+        leaderboardContainer.getChildren().add(leaderboard);
         skinPicker.getItems().setAll(SnakeSkin.values());
         skinPicker.setValue(SnakeSkin.ORANGE);
         skinPicker.setOnAction(event -> drawSkinPreview());
         drawSkinPreview();
     }
+
+    public void refreshLeaderboard() { leaderboard.refresh(); }
 
     private void drawSkinPreview() {
         var gc = skinPreview.getGraphicsContext2D();

@@ -18,6 +18,7 @@ public class ViewManager {
     private AnchorPane root;
 
     private Stage gameStage;
+    private MainMenuController menuController;
 
     private Image snakeLogo = new Image("resources/views/res/SnakeLogoWhite.png");
 
@@ -29,11 +30,12 @@ public class ViewManager {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(Main.class.getResource("/resources/views/MainMenu.fxml"));
             root = loader.load();
+            menuController = loader.getController();
         } catch (IOException exception) {
             exception.printStackTrace();
         }
 
-        Scene mainScene = new Scene(new StackPane(root), 550, 400);
+        Scene mainScene = new Scene(new StackPane(root), 850, 440);
         mainScene.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
             if (event.getCode() == KeyCode.F11) {
                 primaryStage.setFullScreen(!primaryStage.isFullScreen()); event.consume();
@@ -43,6 +45,7 @@ public class ViewManager {
         });
 
         primaryStage.setScene(mainScene);
+        primaryStage.setOnShowing(event -> menuController.refreshLeaderboard());
         primaryStage.setResizable(true);
         primaryStage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
         primaryStage.setFullScreenExitHint("Press F11 or Esc to exit fullscreen");

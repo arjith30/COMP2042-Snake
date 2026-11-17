@@ -140,3 +140,40 @@
     -fx-cursor: hand;
 }
 #fullscreenButton:hover { -fx-background-color: #fff4cf; }
+
+.leaderboard {
+    -fx-background-color: #edf2da;
+    -fx-background-radius: 14;
+    -fx-padding: 14 18;
+}
+.leaderboard .label, #endPanel .leaderboard .label {
+    -fx-font-family: "Arial";
+    -fx-font-size: 15;
+    -fx-font-weight: bold;
+    -fx-text-fill: #274b32;
+}
+.leaderboard .leaderboard-title, #endPanel .leaderboard .leaderboard-title {
+    -fx-font-size: 18;
+    -fx-padding: 0 0 5 0;
+}
+.leaderboard-row { -fx-padding: 2 0; }
+.leaderboard .leaderboard-rank, #endPanel .leaderboard .leaderboard-rank {
+    -fx-text-fill: #658050;
+}
+.leaderboard .leaderboard-status, #endPanel .leaderboard .leaderboard-status {
+    -fx-font-size: 11;
+    -fx-font-weight: normal;
+    -fx-padding: 5 0 0 0;
+}
+#endPanel { -fx-padding: 18; }
+#endPanel .button { -fx-padding: 10 26; }
+#endPanel .leaderboard { -fx-padding: 8 14; -fx-spacing: 2; }
+#endPanel .leaderboard-row {
+    -fx-padding: 0;
+    -fx-min-height: 20;
+    -fx-pref-height: 20;
+    -fx-max-height: 20;
+}
+#endPanel .leaderboard .label { -fx-font-size: 14; }
+#endPanel .leaderboard .leaderboard-title { -fx-font-size: 16; -fx-padding: 0 0 3 0; }
+#endPanel .leaderboard .leaderboard-status { -fx-font-size: 10; -fx-padding: 3 0 0 0; }
