@@ -14,10 +14,10 @@ The game renders each snake as one connected ribbon, using a single base colour 
 
 ## Playing and restarting
 
-- Arrow keys start, steer and resume the snake. Reversing directly into its neck is blocked.
+- WASD or arrow keys start, steer and resume the snake. W moves up, A left, S down and D right. Reversing directly into its neck is blocked.
 - P pauses.
 - Click **Try Again** after losing or winning. The score, apples and snake reset while keeping your skin.
-- R or Tab also restarts a round.
+- Enter restarts after losing or winning. R or Tab also restarts a round.
 - Click **Choose Skin**, or press Esc, to return to the menu.
 - Plus and minus enter and leave fullscreen.
 

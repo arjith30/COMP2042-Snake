@@ -32,7 +32,7 @@ public class GameView {
         gameOverLabel.setVisible(false); gameOverLabel.setManaged(false);
         gameWonLabel.setVisible(false); gameWonLabel.setManaged(false);
         scoreLabel = new Label(); scoreLabel.setId("scoreLabel");
-        hintLabel = new Label("Arrow keys to move  •  P to pause  •  Esc for skins");
+        hintLabel = new Label("WASD / arrows  •  P to pause  •  Esc for skins");
         hintLabel.setId("hintLabel");
         tryAgainButton = new Button("Try Again"); tryAgainButton.setId("tryAgainButton");
         menuButton = new Button("Choose Skin"); menuButton.setId("chooseSkinButton");
@@ -95,10 +95,10 @@ public class GameView {
     private void updateEndPanel() {
         boolean show = gameOverLabel.isVisible() || gameWonLabel.isVisible();
         endPanel.setVisible(show); endPanel.setManaged(show);
-        if (show) hintLabel.setText("Try again or choose another skin");
+        if (show) hintLabel.setText("Enter to try again  •  Esc for skins");
     }
     public void updateScoreLabel() {
         scoreLabel.setText("Apples: " + game.getScore() + "    Score: " + game.getScorePoints());
     }
-    public void showReady() { hintLabel.setText("Arrow keys to move  •  P to pause  •  Esc for skins"); }
+    public void showReady() { hintLabel.setText("WASD / arrows  •  P to pause  •  Esc for skins"); }
 }

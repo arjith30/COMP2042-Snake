@@ -43,7 +43,16 @@ public class GameController {
     }
 
     public void handle(KeyEvent event) {
-        KeyCode pressed = event.getCode();
+        KeyCode pressed = switch (event.getCode()) {
+            case W -> KeyCode.UP;
+            case A -> KeyCode.LEFT;
+            case S -> KeyCode.DOWN;
+            case D -> KeyCode.RIGHT;
+            default -> event.getCode();
+        };
+        if (pressed == KeyCode.ENTER && (snek.getDead() || game.gameWon())) {
+            restart(); event.consume(); return;
+        }
         if (pressed == KeyCode.ESCAPE) { returnToMenu(); event.consume(); return; }
         if (pressed == KeyCode.TAB || pressed == KeyCode.R) { restart(); event.consume(); return; }
         if (pressed == KeyCode.PLUS || pressed == KeyCode.ADD) {
@@ -54,7 +63,7 @@ public class GameController {
         }
         if (snek.getDead() || game.gameWon()) return;
         if (pressed == KeyCode.P) {
-            animation.pause(); gameView.hintLabel.setText("Paused  •  Press an arrow key to resume");
+            animation.pause(); gameView.hintLabel.setText("Paused  •  WASD or arrows to resume");
         }
         if (pressed.isArrowKey()) {
             if (!keyPressed && validDirection(pressed)) {
