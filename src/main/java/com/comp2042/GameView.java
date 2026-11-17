@@ -8,7 +8,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 import java.awt.Point;
 
@@ -16,10 +15,13 @@ public class GameView {
     public Canvas gridCanvas;
     public GraphicsContext gc;
     public Label gameOverLabel, gameWonLabel, scoreLabel, hintLabel;
-    public Button tryAgainButton, menuButton;
+    public Button tryAgainButton, menuButton, fullscreenButton;
     public VBox endPanel;
     private final Game game;
     private double fullScale = 1;
+    private Snake displayedSnake;
+    private Coin displayedApple;
+    private Obstacle displayedObstacle;
 
     public GameView(Game game) { this.game = game; }
 
@@ -32,8 +34,10 @@ public class GameView {
         gameOverLabel.setVisible(false); gameOverLabel.setManaged(false);
         gameWonLabel.setVisible(false); gameWonLabel.setManaged(false);
         scoreLabel = new Label(); scoreLabel.setId("scoreLabel");
-        hintLabel = new Label("WASD / arrows  •  P to pause  •  Esc for skins");
+        hintLabel = new Label("WASD / arrows  •  P pause  •  F11 fullscreen");
         hintLabel.setId("hintLabel");
+        fullscreenButton = new Button("Fullscreen"); fullscreenButton.setId("fullscreenButton");
+        fullscreenButton.setFocusTraversable(false);
         tryAgainButton = new Button("Try Again"); tryAgainButton.setId("tryAgainButton");
         menuButton = new Button("Choose Skin"); menuButton.setId("chooseSkinButton");
         // Buttons never steal the arrow keys needed to steer after restarting.
@@ -47,15 +51,23 @@ public class GameView {
 
     public void scaleToFullscreen(boolean fullscreen, Stage stage, Obstacle obstacle, Snake snake, Coin apple) {
         stage.setFullScreen(fullscreen);
-        fullScale = fullscreen ? Math.min(
-                (Screen.getPrimary().getVisualBounds().getWidth() - 32) / (game.getWidth() * game.getMultiplier()),
-                (Screen.getPrimary().getVisualBounds().getHeight() - 100) / (game.getHeight() * game.getMultiplier())) : 1;
-        gridCanvas.setWidth(game.getWidth() * game.getMultiplier() * fullScale);
-        gridCanvas.setHeight(game.getHeight() * game.getMultiplier() * fullScale);
-        drawGrid(apple, snake, obstacle, gc, false, 0);
+    }
+
+    public void resizeBoard(double availableWidth, double availableHeight) {
+        if (availableWidth <= 0 || availableHeight <= 0) return;
+        double tile = Math.min(availableWidth / game.getWidth(), availableHeight / game.getHeight());
+        double width = tile * game.getWidth(), height = tile * game.getHeight();
+        if (Math.abs(gridCanvas.getWidth() - width) < .01 && Math.abs(gridCanvas.getHeight() - height) < .01) return;
+        fullScale = tile / game.getMultiplier();
+        gridCanvas.setWidth(width); gridCanvas.setHeight(height);
+        if (displayedApple != null && displayedSnake != null) {
+            if (displayedObstacle == null) drawGrid(displayedApple, displayedSnake, gc);
+            else drawGrid(displayedApple, displayedSnake, displayedObstacle, gc, false, 0);
+        }
     }
 
     public void drawGrid(Coin apple, Snake snake, Obstacle obstacle, GraphicsContext context, boolean unused, int ignored) {
+        displayedObstacle = obstacle;
         drawGrid(apple, snake, context);
         double tile = game.getMultiplier() * fullScale;
         context.setFill(Color.web("#486745"));
@@ -64,6 +76,7 @@ public class GameView {
     }
 
     private void drawGrid(Coin apple, Snake snake, GraphicsContext context) {
+        displayedApple = apple; displayedSnake = snake;
         double tile = game.getMultiplier() * fullScale;
         drawGrass(context, game.getWidth(), game.getHeight(), tile);
         context.drawImage(apple.getImage(), apple.getPos().x * tile, apple.getPos().y * tile, tile, tile);
@@ -73,7 +86,8 @@ public class GameView {
     public static void drawGrass(GraphicsContext g, int columns, int rows, double tile) {
         for (int y = 0; y < rows; y++) for (int x = 0; x < columns; x++) {
             g.setFill(Color.web((x + y) % 2 == 0 ? "#a3d56b" : "#98cb60"));
-            g.fillRect(x * tile, y * tile, tile, tile);
+            double left = Math.round(x * tile), top = Math.round(y * tile);
+            g.fillRect(left, top, Math.round((x + 1) * tile) - left, Math.round((y + 1) * tile) - top);
             // Deterministic sparse tufts stay still while the snake moves.
             if ((x * 7 + y * 11) % 5 == 0) {
                 double px = (x + .23) * tile, py = (y + .78) * tile;
@@ -100,5 +114,5 @@ public class GameView {
     public void updateScoreLabel() {
         scoreLabel.setText("Apples: " + game.getScore() + "    Score: " + game.getScorePoints());
     }
-    public void showReady() { hintLabel.setText("WASD / arrows  •  P to pause  •  Esc for skins"); }
+    public void showReady() { hintLabel.setText("WASD / arrows  •  P pause  •  F11 fullscreen"); }
 }

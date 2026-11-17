@@ -127,3 +127,16 @@
     -fx-text-fill: #274b32;
     -fx-font-size: 15;
 }
+
+#fullscreenButton {
+    -fx-font-family: "Arial";
+    -fx-font-size: 12;
+    -fx-font-weight: bold;
+    -fx-background-image: none;
+    -fx-background-color: #e3edcf;
+    -fx-text-fill: #274b32;
+    -fx-background-radius: 8;
+    -fx-padding: 8 10;
+    -fx-cursor: hand;
+}
+#fullscreenButton:hover { -fx-background-color: #fff4cf; }

@@ -46,8 +46,10 @@ public class MainMenuController {
         Stage gameStage = viewManager.getGameStage();
         launchSnake(gameStage);
         gameStage.setScene(gameScene);
+        boolean fullscreen = viewManager.getPrimaryStage().isFullScreen();
         viewManager.getPrimaryStage().close();
         gameStage.show();
+        if (fullscreen) gameStage.setFullScreen(true);
     }
 
     private void launchSnake(Stage gameStage) {
@@ -66,12 +68,23 @@ public class MainMenuController {
 
         gameView.makeScene(gameScene, snek, coin);
         gameScene.getStylesheets().add("resources/views/styling.css");
-        javafx.scene.layout.HBox hud = new javafx.scene.layout.HBox(20, gameView.scoreLabel, gameView.hintLabel);
+        javafx.scene.layout.HBox hud = new javafx.scene.layout.HBox(12, gameView.scoreLabel, gameView.hintLabel, gameView.fullscreenButton);
         hud.setAlignment(Pos.CENTER); hud.setPrefHeight(56); hud.setId("gameHud");
+        javafx.scene.layout.HBox.setHgrow(gameView.hintLabel, javafx.scene.layout.Priority.ALWAYS);
+        gameView.hintLabel.setMinWidth(0);
         StackPane board = new StackPane(gameView.gridCanvas, gameView.endPanel);
+        board.setMinSize(0, 0); board.setId("gameBoard");
+        board.setStyle("-fx-background-color: #274b32;");
+        board.widthProperty().addListener((observable, oldValue, newValue) ->
+                gameView.resizeBoard(board.getWidth(), board.getHeight()));
+        board.heightProperty().addListener((observable, oldValue, newValue) ->
+                gameView.resizeBoard(board.getWidth(), board.getHeight()));
         javafx.scene.layout.BorderPane layout = new javafx.scene.layout.BorderPane(board);
         layout.setTop(hud);
         gamePane.getChildren().add(layout);
+        gameView.fullscreenButton.setOnAction(event -> controller.toggleFullscreen());
+        gameStage.fullScreenProperty().addListener((observable, oldValue, fullscreen) ->
+                gameView.fullscreenButton.setText(fullscreen ? "Exit Fullscreen" : "Fullscreen"));
         gameView.tryAgainButton.setOnAction(event -> controller.restart());
         gameView.menuButton.setOnAction(event -> controller.returnToMenu());
         gameStage.setOnHidden(event -> controller.stop());

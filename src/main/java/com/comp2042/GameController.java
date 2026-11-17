@@ -53,7 +53,14 @@ public class GameController {
         if (pressed == KeyCode.ENTER && (snek.getDead() || game.gameWon())) {
             restart(); event.consume(); return;
         }
-        if (pressed == KeyCode.ESCAPE) { returnToMenu(); event.consume(); return; }
+        if (pressed == KeyCode.F11) {
+            toggleFullscreen(); event.consume(); return;
+        }
+        if (pressed == KeyCode.ESCAPE) {
+            if (stage.isFullScreen()) stage.setFullScreen(false);
+            else returnToMenu();
+            event.consume(); return;
+        }
         if (pressed == KeyCode.TAB || pressed == KeyCode.R) { restart(); event.consume(); return; }
         if (pressed == KeyCode.PLUS || pressed == KeyCode.ADD) {
             gameView.scaleToFullscreen(true, stage, obstacle, snek, coin); event.consume(); return;
@@ -92,6 +99,8 @@ public class GameController {
         gameView.drawGrid(coin, snek, obstacle, gameView.gc, false, 0);
         gameView.gridCanvas.requestFocus();
     }
+
+    public void toggleFullscreen() { stage.setFullScreen(!stage.isFullScreen()); }
 
     public void stop() { animation.stop(); }
     public void returnToMenu() {

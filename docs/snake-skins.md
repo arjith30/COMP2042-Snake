@@ -19,7 +19,7 @@ The game renders each snake as one connected ribbon, using a single base colour 
 - Click **Try Again** after losing or winning. The score, apples and snake reset while keeping your skin.
 - Enter restarts after losing or winning. R or Tab also restarts a round.
 - Click **Choose Skin**, or press Esc, to return to the menu.
-- Plus and minus enter and leave fullscreen.
+- Click **Fullscreen** or press F11 to toggle fullscreen. Esc exits fullscreen first; press Esc again to return to the menu. Plus and minus also enter and leave fullscreen. The board automatically fits the available space with square tiles when fullscreen, maximized or resized. F11 also works in the skin menu.
 
 ![Larger grass board and apple](game-board.png)
 
@@ -41,3 +41,5 @@ The existing JavaFX 25.0.1 dependency needs JDK 23 or later at runtime. JDK 25 i
 ## Validation
 
 The Maven package build passes with JDK 25. Headless JavaFX checks cover all five skins, menu/start-button wiring, apple scoring and growth, turns and reverse-direction rejection, wall collision, the actual Try Again button, preserving the skin after retry, moving after retry, a full-board win without hanging during food spawning, restarting after victory, returning to skin selection, and the 660 × 716 scene with 44px tiles. The artwork, board and loss-screen snapshots were visually inspected. These checks do not replace manual gameplay on Windows.
+
+Fullscreen checks pass for menu and game F11 shortcuts, the fullscreen button, Esc, plus/minus, starting a game from the fullscreen menu, centered square boards at 1920 × 1080, 1280 × 720, 560 × 500 and 660 × 716, and loss/retry and WASD after resizing. These are headless JavaFX checks; native Windows fullscreen has not been manually tested.
