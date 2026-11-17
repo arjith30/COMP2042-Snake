@@ -33,7 +33,7 @@ public class Game {
         if (height > 50) {
             multiplier = 10;
         } else {
-            multiplier = 32;
+            multiplier = 44;
         }
     }
 

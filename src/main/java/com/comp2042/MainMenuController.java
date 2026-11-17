@@ -10,8 +10,8 @@ import javafx.stage.Stage;
 
 public class MainMenuController {
 
-    private static final int X_VALUE = 20;
-    private static final int Y_VALUE = 20;
+    private static final int X_VALUE = 15;
+    private static final int Y_VALUE = 15;
     private static final boolean POWER_UP = false;
     private static final char DIFFICULTY = 'N';
 

@@ -1,6 +1,6 @@
 # Snake: Apple Meadow
 
-Choose one of five cartoon skins, then collect red apples on the grass board. The 20 × 20 board now uses 32px tiles (previously 20px), with a separate score and controls bar. A new snake starts four tiles long. Each apple adds one segment and five points. Food spawns in empty cells, and filling the board wins the round.
+Choose one of five cartoon skins, then collect red apples on the grass board. The 15 × 15 board uses 44px tiles (previously 20 × 20 with 32px tiles), with a separate score and controls bar. A new snake starts four tiles long. Each apple adds one segment and five points. Food spawns in empty cells, and filling the board wins the round.
 
 ![Five connected skins on grass](snake-skins-preview.png)
 
@@ -40,4 +40,4 @@ The existing JavaFX 25.0.1 dependency needs JDK 23 or later at runtime. JDK 25 i
 
 ## Validation
 
-The Maven package build passes with JDK 25. Headless JavaFX checks cover all five skins, menu/start-button wiring, apple scoring and growth, turns and reverse-direction rejection, wall collision, the actual Try Again button, preserving the skin after retry, moving after retry, a full-board win without hanging during food spawning, restarting after victory, returning to skin selection, and the 640 × 696 scene with 32px tiles. The artwork, board and loss-screen snapshots were visually inspected. These checks do not replace manual gameplay on Windows.
+The Maven package build passes with JDK 25. Headless JavaFX checks cover all five skins, menu/start-button wiring, apple scoring and growth, turns and reverse-direction rejection, wall collision, the actual Try Again button, preserving the skin after retry, moving after retry, a full-board win without hanging during food spawning, restarting after victory, returning to skin selection, and the 660 × 716 scene with 44px tiles. The artwork, board and loss-screen snapshots were visually inspected. These checks do not replace manual gameplay on Windows.
