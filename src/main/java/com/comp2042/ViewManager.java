@@ -1,9 +1,15 @@
 package com.comp2042;
 
+import com.comp2042.model.Snake;
+
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -14,6 +20,7 @@ public class ViewManager {
     private AnchorPane root;
 
     private Stage gameStage;
+    private MainMenuController menuController;
 
     private Image snakeLogo = new Image("resources/views/res/SnakeLogoWhite.png");
 
@@ -25,14 +32,25 @@ public class ViewManager {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(Main.class.getResource("/resources/views/MainMenu.fxml"));
             root = loader.load();
+            menuController = loader.getController();
         } catch (IOException exception) {
             exception.printStackTrace();
         }
 
-        Scene mainScene = new Scene(root);
+        Scene mainScene = new Scene(new StackPane(root), 850, 440);
+        mainScene.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            if (event.getCode() == KeyCode.F11) {
+                primaryStage.setFullScreen(!primaryStage.isFullScreen()); event.consume();
+            } else if (event.getCode() == KeyCode.ESCAPE && primaryStage.isFullScreen()) {
+                primaryStage.setFullScreen(false); event.consume();
+            }
+        });
 
         primaryStage.setScene(mainScene);
-        primaryStage.setResizable(false);
+        primaryStage.setOnShowing(event -> menuController.refreshLeaderboard());
+        primaryStage.setResizable(true);
+        primaryStage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
+        primaryStage.setFullScreenExitHint("Press F11 or Esc to exit fullscreen");
         primaryStage.getIcons().add(snakeLogo);
         primaryStage.setTitle("Snake Game");
         primaryStage.show();
@@ -46,7 +64,10 @@ public class ViewManager {
         gameStage = new Stage();
         gameStage.setTitle("Snake Game");
         gameStage.getIcons().add(snakeLogo);
-        gameStage.setResizable(false);
+        gameStage.setResizable(true);
+        gameStage.setMinWidth(560); gameStage.setMinHeight(500);
+        gameStage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
+        gameStage.setFullScreenExitHint("Press F11 or Esc to exit fullscreen");
     }
 
     public Stage getGameStage() {

@@ -1,194 +1,125 @@
 package com.comp2042;
 
+import com.comp2042.model.Snake;
+import com.comp2042.model.Direction;
+
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-
-import java.io.File;
-import java.util.Random;
 
 public class GameController {
     private Snake snek;
     private Coin coin;
-    private GameView gameView;
-    private Game game;
-    private Stage stage;
-    private String coinSoundPath = "resources/views/res/coinSound.wav";
-    private Obstacle obstacle;
-
+    private final GameView gameView;
+    private final Game game;
+    private final Stage stage;
+    private final Obstacle obstacle;
     public static KeyCode key = KeyCode.LEFT;
     public static KeyCode lastKey = KeyCode.LEFT;
-    private boolean keyPressed = false;
+    private boolean keyPressed;
+    private boolean scoreRecorded;
+    private final Timeline animation;
 
-    private int legacyScoreMultiplier = 2;
-
-    private void calculateBonusScore() {
-        int bonus = game.getScorePoints() * legacyScoreMultiplier;
-        System.out.println("Bonus score: " + bonus);
+    public GameController(Snake snake, Coin apple, Game game, GameView view, Obstacle obstacle, Stage stage) {
+        this.snek = snake; this.coin = apple; this.game = game;
+        this.gameView = view; this.obstacle = obstacle; this.stage = stage;
+        key = lastKey = KeyCode.LEFT;
+        animation = new Timeline(new KeyFrame(Duration.seconds(1), event -> tick()));
+        animation.setCycleCount(Animation.INDEFINITE); animation.setRate(game.getSpeed());
     }
 
-    public GameController(Snake snek, Coin coin, Game game, GameView gameView, Obstacle obstacle, Stage stage) {
-        this.snek = snek;
-        this.coin = coin;
-        this.gameView = gameView;
-        this.game = game;
-        this.stage = stage;
-
-        this.obstacle = obstacle;
-        animation.setCycleCount(Animation.INDEFINITE);
-        animation.setRate(game.getSpeed());
-    }
-
-    private final Timeline animation = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
-        if (snek.getDead()) {
-            return;
-        } else {
-
-            if (key.equals(KeyCode.LEFT)) {
-                snek.move('L');
-            } else if (key.equals(KeyCode.RIGHT)) {
-                snek.move('R');
-            } else if (key.equals(KeyCode.UP)) {
-                snek.move('U');
-            } else if (key.equals(KeyCode.DOWN)) {
-                snek.move('D');
-            }
-
-            if (!snek.getDead() && snek.ateCoin(coin)) {
-                powerCoin();
-                game.incScore();
-                if (game.gameWon()) {
-                    gameView.drawGrid(coin, snek, obstacle, gameView.gc, false, 0);
-                    return;
-                }
-                newCoin();
-            }
-
-            keyPressed = false;
-
-            if (!snek.getDead() || snek.hitSelf()) {
-                gameView.drawGrid(coin, snek, obstacle, gameView.gc, false, 0);
-            }
-
-            gameView.gameWon();
-            gameView.gameOver(snek);
-            gameView.updateScoreLabel();
+    private void tick() {
+        if (snek.isDead() || game.gameWon()) { animation.stop(); return; }
+        if (snek.advance(directionFor(key), coin.getPos(), obstacle.getObstacles())) {
+            game.incScore(); game.addPoints(coin.getPoints());
+            // Do not search for a free spawn cell after filling the entire board.
+            if (!game.gameWon()) coin = new Coin(game.getWidth(), game.getHeight(), snek, obstacle);
         }
-    }));
+        keyPressed = false;
+        gameView.drawGrid(coin, snek, obstacle, gameView.gc, false, 0);
+        if ((snek.isDead() || game.gameWon()) && !scoreRecorded) {
+            scoreRecorded = true;
+            Leaderboard.local().record(game.getScorePoints());
+            gameView.refreshLeaderboard();
+        }
+        gameView.updateScoreLabel(); gameView.gameOver(snek); gameView.gameWon();
+        if (snek.isDead() || game.gameWon()) animation.stop();
+    }
 
     public void handle(KeyEvent event) {
-        if (event.getCode().isArrowKey()) animation.play();
-
-        if (valKey(event.getCode()) && !keyPressed) {
-            lastKey = key;
-            key = event.getCode();
-            keyPressed = true;
-            gameView.turnDir(snek);
+        KeyCode pressed = switch (event.getCode()) {
+            case W -> KeyCode.UP;
+            case A -> KeyCode.LEFT;
+            case S -> KeyCode.DOWN;
+            case D -> KeyCode.RIGHT;
+            default -> event.getCode();
+        };
+        if (pressed == KeyCode.ENTER && (snek.isDead() || game.gameWon())) {
+            restart(); event.consume(); return;
         }
-
-        if (event.getCode().equals(KeyCode.P)) {
-            animation.stop();
+        if (pressed == KeyCode.F11) {
+            toggleFullscreen(); event.consume(); return;
         }
-
-        if (event.getCode().equals(KeyCode.TAB)) {
-            reset();
-            gameView.scoreLabel.setText("Score: " + game.getScorePoints());
+        if (pressed == KeyCode.ESCAPE) {
+            if (stage.isFullScreen()) stage.setFullScreen(false);
+            else returnToMenu();
+            event.consume(); return;
         }
-
-        if (event.getCode().equals(KeyCode.PLUS)) {
-            gameView.scaleToFullscreen(true, stage, obstacle, snek, coin);
-            gameView.gameOverLabel.setStyle("-fx-font-size: 50;");
-            gameView.gameWonLabel.setStyle("-fx-font-size: 50;");
-            gameView.scoreLabel.setStyle("-fx-font-size: 35;");
+        if (pressed == KeyCode.TAB || pressed == KeyCode.R) { restart(); event.consume(); return; }
+        if (pressed == KeyCode.PLUS || pressed == KeyCode.ADD) {
+            gameView.scaleToFullscreen(true, stage, obstacle, snek, coin); event.consume(); return;
         }
-
-        if (event.getCode().equals(KeyCode.MINUS)) {
-            gameView.scaleToFullscreen(false, stage, obstacle, snek, coin);
-            gameView.gameOverLabel.setStyle("-fx-font-size: 15;");
-            gameView.gameWonLabel.setStyle("-fx-font-size: 15;");
-            gameView.scoreLabel.setStyle("-fx-font-size: 15;");
+        if (pressed == KeyCode.MINUS || pressed == KeyCode.SUBTRACT) {
+            gameView.scaleToFullscreen(false, stage, obstacle, snek, coin); event.consume(); return;
         }
-
-        if (event.getCode().equals(KeyCode.ESCAPE)) {
-            MainMenuController mainMenuController = new MainMenuController();
-            mainMenuController.getViewManager().getPrimaryStage().show();
-            mainMenuController.getViewManager().getGameStage().close();
+        if (snek.isDead() || game.gameWon()) return;
+        if (pressed == KeyCode.P) {
+            animation.pause(); gameView.hintLabel.setText("Paused  •  WASD or arrows to resume");
         }
-    }
-
-    private boolean valKey(KeyCode key) {
-        if (!key.isArrowKey()) return false;
-        else {
-            if (key.equals(KeyCode.LEFT)) if (!this.key.equals(KeyCode.RIGHT)) return true;
-            if (key.equals(KeyCode.RIGHT)) if (!this.key.equals(KeyCode.LEFT)) return true;
-            if (key.equals(KeyCode.DOWN)) if (!this.key.equals(KeyCode.DOWN)) return true;
-            if (key.equals(KeyCode.UP)) return !this.key.equals(KeyCode.DOWN);
-            return false;
-        }
-    }
-
-    private void reset() {
-
-        animation.jumpTo(Duration.ZERO);
-        animation.stop();
-
-        snek = new Snake(game.getWidth(), game.getHeight(), game.isNoBorder(), obstacle);
-        coin = new Coin(game.getWidth(), game.getHeight(), snek, obstacle);
-
-        int unusedObstacleCount = new Random().nextInt(game.getWidth() * game.getHeight() / 20) + 3;
-
-        animation.setRate(game.getSpeed());
-        key = KeyCode.LEFT;
-        keyPressed = false;
-        game.resetScore();
-        obstacle.reset();
-
-        gameView.gameWon();
-        gameView.gameOver(snek);
-        gameView.updateScoreLabel();
-
-        gameView.drawGrid(coin, snek, obstacle, gameView.gc, false, 0);
-    }
-
-    private void powerCoin() {
-        animation.setRate(game.getSpeed());
-        snek.ignoreBorders(false);
-        if (coin.getClass().equals(RainbowCoin.class)) {
-            RainbowCoin tempCoin = (RainbowCoin) coin;
-            animation.setRate(game.getSpeed() + tempCoin.getSpeedBonus());
-        } else if (coin.getClass().equals(SilverCoin.class)){
-            Random rnd = new Random();
-            obstacle.newObstacles(snek, coin, rnd.nextInt(game.getWidth() * game.getHeight()/ 20) +3);
-            game.decMaxScore(obstacle.getObstacles().size());
-        } else if (coin.getClass().equals(BlueCoin.class)) {
-            snek.ignoreBorders(true);
-        }
-        game.addPoints(coin.getPoints());
-    }
-
-    private void newCoin() {
-        if (game.isPowerUp()) {
-            Random rnd = new Random();
-            int ran = rnd.nextInt(12);
-            if (ran == 1) {
-                coin = new GoldCoin(game.getWidth(), game.getHeight(), snek, obstacle);
-            } else if (ran == 1) {
-                coin = new RainbowCoin(game.getWidth(), game.getHeight(), snek, obstacle);
-            } else if (ran == 3) {
-                coin = new BlueCoin(game.getWidth(), game.getHeight(), snek, obstacle);
-            } else if (ran == 4 && obstacle.getObstacles().size() == 0) {
-                coin = new SilverCoin(game.getWidth(), game.getHeight(), snek, obstacle);
-            } else {
-                coin = new Coin(game.getWidth(), game.getHeight(), snek, obstacle);
+        if (pressed.isArrowKey()) {
+            if (!keyPressed && validDirection(pressed)) {
+                lastKey = key; key = pressed; keyPressed = true;
             }
-        } else {
-            coin = new Coin(game.getWidth(), game.getHeight(), snek, obstacle);
+            animation.play(); gameView.hintLabel.setText("Collect apples!  •  P to pause  •  R to restart");
+            event.consume();
         }
+    }
+
+    private static Direction directionFor(KeyCode code) {
+        return switch (code) {
+            case UP -> Direction.UP;
+            case RIGHT -> Direction.RIGHT;
+            case DOWN -> Direction.DOWN;
+            default -> Direction.LEFT;
+        };
+    }
+
+    private boolean validDirection(KeyCode pressed) {
+        return !snek.getDirection().isOppositeTo(directionFor(pressed));
+    }
+
+    public void restart() {
+        animation.stop(); animation.jumpTo(Duration.ZERO);
+        obstacle.reset(); game.resetScore();
+        snek = new Snake(game.getWidth(), game.getHeight(), game.isNoBorder());
+        coin = new Coin(game.getWidth(), game.getHeight(), snek, obstacle);
+        key = lastKey = KeyCode.LEFT; keyPressed = false; scoreRecorded = false;
+        animation.setRate(game.getSpeed());
+        gameView.gameOver(snek); gameView.gameWon(); gameView.updateScoreLabel(); gameView.showReady();
+        gameView.drawGrid(coin, snek, obstacle, gameView.gc, false, 0);
+        gameView.gridCanvas.requestFocus();
+    }
+
+    public void toggleFullscreen() { stage.setFullScreen(!stage.isFullScreen()); }
+
+    public void stop() { animation.stop(); }
+    public void returnToMenu() {
+        stop();
+        if (Main.getViewManager() != null) Main.getViewManager().getPrimaryStage().show();
+        stage.close();
     }
 }
