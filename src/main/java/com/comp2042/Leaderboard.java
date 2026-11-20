@@ -13,8 +13,10 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public final class Leaderboard {
-    private static final Leaderboard LOCAL = new Leaderboard(
-            Path.of(System.getProperty("snake.data.dir", "data"), "leaderboard.txt"));
+    private static final class LocalHolder {
+        private static final Leaderboard INSTANCE = new Leaderboard(
+                Path.of(System.getProperty("snake.data.dir", "data"), "leaderboard.txt"));
+    }
     private final Path file;
     private final ArrayList<Integer> scores = new ArrayList<>();
     private boolean persistent = true;
@@ -34,7 +36,7 @@ public final class Leaderboard {
         trim();
     }
 
-    public static Leaderboard local() { return LOCAL; }
+    public static Leaderboard local() { return LocalHolder.INSTANCE; }
     public List<Integer> scores() { return List.copyOf(scores); }
     public boolean isPersistent() { return persistent; }
 

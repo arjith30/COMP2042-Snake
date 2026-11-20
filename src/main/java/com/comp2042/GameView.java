@@ -1,5 +1,7 @@
 package com.comp2042;
 
+import com.comp2042.model.Snake;
+
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -20,12 +22,15 @@ public class GameView {
     private LeaderboardView leaderboard;
     private Label endMessage;
     private final Game game;
+    private final SnakeSkin skin;
     private double fullScale = 1;
     private Snake displayedSnake;
     private Coin displayedApple;
     private Obstacle displayedObstacle;
 
-    public GameView(Game game) { this.game = game; }
+    public GameView(Game game) { this(game, SnakeSkin.ORANGE); }
+
+    public GameView(Game game, SnakeSkin skin) { this.game = game; this.skin = skin; }
 
     public void makeScene(Scene scene, Snake snake, Coin apple) {
         gridCanvas = new Canvas(game.getWidth() * game.getMultiplier(), game.getHeight() * game.getMultiplier());
@@ -83,7 +88,7 @@ public class GameView {
         double tile = game.getMultiplier() * fullScale;
         drawGrass(context, game.getWidth(), game.getHeight(), tile);
         context.drawImage(apple.getImage(), apple.getPos().x * tile, apple.getPos().y * tile, tile, tile);
-        snake.getSkin().drawSnake(context, snake, tile);
+        skin.drawSnake(context, snake, tile);
     }
 
     public static void drawGrass(GraphicsContext g, int columns, int rows, double tile) {
@@ -102,7 +107,7 @@ public class GameView {
     }
 
     public void gameOver(Snake snake) {
-        gameOverLabel.setVisible(snake.getDead()); gameOverLabel.setManaged(snake.getDead());
+        gameOverLabel.setVisible(snake.isDead()); gameOverLabel.setManaged(snake.isDead());
         updateEndPanel();
     }
     public void gameWon() {

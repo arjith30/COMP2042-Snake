@@ -1,5 +1,8 @@
 package com.comp2042;
 
+import com.comp2042.model.Snake;
+import com.comp2042.model.Direction;
+
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -30,22 +33,21 @@ public class GameController {
     }
 
     private void tick() {
-        if (snek.getDead() || game.gameWon()) { animation.stop(); return; }
-        snek.move(key == KeyCode.UP ? 'U' : key == KeyCode.DOWN ? 'D' : key == KeyCode.RIGHT ? 'R' : 'L');
-        if (!snek.getDead() && snek.ateCoin(coin)) {
+        if (snek.isDead() || game.gameWon()) { animation.stop(); return; }
+        if (snek.advance(directionFor(key), coin.getPos(), obstacle.getObstacles())) {
             game.incScore(); game.addPoints(coin.getPoints());
             // Do not search for a free spawn cell after filling the entire board.
             if (!game.gameWon()) coin = new Coin(game.getWidth(), game.getHeight(), snek, obstacle);
         }
         keyPressed = false;
         gameView.drawGrid(coin, snek, obstacle, gameView.gc, false, 0);
-        if ((snek.getDead() || game.gameWon()) && !scoreRecorded) {
+        if ((snek.isDead() || game.gameWon()) && !scoreRecorded) {
             scoreRecorded = true;
             Leaderboard.local().record(game.getScorePoints());
             gameView.refreshLeaderboard();
         }
         gameView.updateScoreLabel(); gameView.gameOver(snek); gameView.gameWon();
-        if (snek.getDead() || game.gameWon()) animation.stop();
+        if (snek.isDead() || game.gameWon()) animation.stop();
     }
 
     public void handle(KeyEvent event) {
@@ -56,7 +58,7 @@ public class GameController {
             case D -> KeyCode.RIGHT;
             default -> event.getCode();
         };
-        if (pressed == KeyCode.ENTER && (snek.getDead() || game.gameWon())) {
+        if (pressed == KeyCode.ENTER && (snek.isDead() || game.gameWon())) {
             restart(); event.consume(); return;
         }
         if (pressed == KeyCode.F11) {
@@ -74,7 +76,7 @@ public class GameController {
         if (pressed == KeyCode.MINUS || pressed == KeyCode.SUBTRACT) {
             gameView.scaleToFullscreen(false, stage, obstacle, snek, coin); event.consume(); return;
         }
-        if (snek.getDead() || game.gameWon()) return;
+        if (snek.isDead() || game.gameWon()) return;
         if (pressed == KeyCode.P) {
             animation.pause(); gameView.hintLabel.setText("Paused  •  WASD or arrows to resume");
         }
@@ -87,17 +89,23 @@ public class GameController {
         }
     }
 
+    private static Direction directionFor(KeyCode code) {
+        return switch (code) {
+            case UP -> Direction.UP;
+            case RIGHT -> Direction.RIGHT;
+            case DOWN -> Direction.DOWN;
+            default -> Direction.LEFT;
+        };
+    }
+
     private boolean validDirection(KeyCode pressed) {
-        return !(pressed == KeyCode.LEFT && key == KeyCode.RIGHT
-                || pressed == KeyCode.RIGHT && key == KeyCode.LEFT
-                || pressed == KeyCode.DOWN && key == KeyCode.UP
-                || pressed == KeyCode.UP && key == KeyCode.DOWN);
+        return !snek.getDirection().isOppositeTo(directionFor(pressed));
     }
 
     public void restart() {
         animation.stop(); animation.jumpTo(Duration.ZERO);
         obstacle.reset(); game.resetScore();
-        snek = new Snake(game.getWidth(), game.getHeight(), game.isNoBorder(), obstacle, snek.getSkin());
+        snek = new Snake(game.getWidth(), game.getHeight(), game.isNoBorder());
         coin = new Coin(game.getWidth(), game.getHeight(), snek, obstacle);
         key = lastKey = KeyCode.LEFT; keyPressed = false; scoreRecorded = false;
         animation.setRate(game.getSpeed());
