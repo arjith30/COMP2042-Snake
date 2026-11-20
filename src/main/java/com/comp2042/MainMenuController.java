@@ -1,5 +1,7 @@
 package com.comp2042;
 
+import com.comp2042.model.Snake;
+
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.ChoiceBox;
@@ -61,10 +63,10 @@ public class MainMenuController {
     private void launchSnake(Stage gameStage) {
         Game game = new Game(X_VALUE, Y_VALUE, POWER_UP, DIFFICULTY);
         Obstacle obstacle = new Obstacle(game.getWidth(), game.getHeight());
-        Snake snek = new Snake(game.getWidth(), game.getHeight(), game.isNoBorder(), obstacle, skinPicker.getValue());
+        Snake snek = new Snake(game.getWidth(), game.getHeight(), game.isNoBorder());
         Coin coin = new Coin(game.getWidth(), game.getHeight(), snek, obstacle);
 
-        GameView gameView = new GameView(game);
+        GameView gameView = new GameView(game, skinPicker.getValue());
         GameController controller = new GameController(snek, coin, game, gameView, obstacle, gameStage);
 
         StackPane gamePane = new StackPane();

@@ -1,5 +1,7 @@
 package com.comp2042;
 
+import com.comp2042.model.Snake;
+
 import javafx.scene.paint.Color;
 
 public class Game {
@@ -28,7 +30,7 @@ public class Game {
         this.powerUp = powerUp;
         width = x;
         height = y;
-        maxScore = x * y - 4;
+        maxScore = x * y - Snake.INITIAL_LENGTH;
         this.powerUp = powerUp;
         if (height > 50) {
             multiplier = 10;
@@ -60,7 +62,7 @@ public class Game {
     public void resetScore() {
         score = 0;
         scorePoints = 0;
-        maxScore = width * height - 4;
+        maxScore = width * height - Snake.INITIAL_LENGTH;
     }
 
     public Color getColor() {

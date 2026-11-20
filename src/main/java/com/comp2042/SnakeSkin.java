@@ -1,5 +1,7 @@
 package com.comp2042;
 
+import com.comp2042.model.Snake;
+
 import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -74,7 +76,13 @@ public enum SnakeSkin {
     public void drawSnake(GraphicsContext g, Snake snake, double tile) {
         ArrayList<Point> cells = snake.getBody();
         cells.add(snake.getHead());
-        drawConnected(g, cells, snake.getSnakeDir(), tile);
+        int angle = switch (snake.getDirection()) {
+            case UP -> 0;
+            case RIGHT -> 90;
+            case DOWN -> 180;
+            case LEFT -> 270;
+        };
+        drawConnected(g, cells, angle, tile);
     }
 
     public void drawConnected(GraphicsContext g, List<Point> cells, int headDirection, double tile) {

@@ -1,5 +1,7 @@
 package com.comp2042;
 
+import com.comp2042.model.Snake;
+
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
