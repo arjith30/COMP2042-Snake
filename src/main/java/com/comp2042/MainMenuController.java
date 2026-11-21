@@ -1,6 +1,7 @@
 package com.comp2042;
 
 import com.comp2042.model.Snake;
+import com.comp2042.model.Level;
 
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
@@ -14,11 +15,11 @@ public class MainMenuController {
 
     private static final int X_VALUE = 15;
     private static final int Y_VALUE = 15;
-    private static final boolean POWER_UP = false;
-    private static final char DIFFICULTY = 'N';
 
     @FXML private ChoiceBox<SnakeSkin> skinPicker;
     @FXML private Canvas skinPreview;
+    @FXML private ChoiceBox<Level> levelPicker;
+    @FXML private javafx.scene.control.Label levelDescription;
     @FXML private javafx.scene.layout.VBox leaderboardContainer;
     private LeaderboardView leaderboard;
 
@@ -30,6 +31,10 @@ public class MainMenuController {
         skinPicker.setValue(SnakeSkin.ORANGE);
         skinPicker.setOnAction(event -> drawSkinPreview());
         drawSkinPreview();
+        levelPicker.getItems().setAll(Level.values());
+        levelPicker.setValue(Level.MEADOW);
+        levelPicker.setOnAction(event -> levelDescription.setText(levelPicker.getValue().description()));
+        levelDescription.setText(Level.MEADOW.description());
     }
 
     public void refreshLeaderboard() { leaderboard.refresh(); }
@@ -61,8 +66,8 @@ public class MainMenuController {
     }
 
     private void launchSnake(Stage gameStage) {
-        Game game = new Game(X_VALUE, Y_VALUE, POWER_UP, DIFFICULTY);
-        Obstacle obstacle = new Obstacle(game.getWidth(), game.getHeight());
+        Game game = new Game(X_VALUE, Y_VALUE, levelPicker.getValue());
+        Obstacle obstacle = new Obstacle(game.getWidth(), game.getHeight(), game.getLevel());
         Snake snek = new Snake(game.getWidth(), game.getHeight(), game.isNoBorder());
         Coin coin = new Coin(game.getWidth(), game.getHeight(), snek, obstacle);
 
@@ -75,8 +80,9 @@ public class MainMenuController {
         gameScene.setOnKeyPressed(controller::handle);
 
         gameView.makeScene(gameScene, snek, coin);
+        gameView.drawGrid(coin, snek, obstacle, gameView.gc, false, 0);
         gameScene.getStylesheets().add("resources/views/styling.css");
-        javafx.scene.layout.HBox hud = new javafx.scene.layout.HBox(12, gameView.scoreLabel, gameView.hintLabel, gameView.fullscreenButton);
+        javafx.scene.layout.HBox hud = new javafx.scene.layout.HBox(12, new javafx.scene.layout.VBox(0, gameView.levelLabel, gameView.scoreLabel), gameView.hintLabel, gameView.fullscreenButton);
         hud.setAlignment(Pos.CENTER); hud.setPrefHeight(56); hud.setId("gameHud");
         javafx.scene.layout.HBox.setHgrow(gameView.hintLabel, javafx.scene.layout.Priority.ALWAYS);
         gameView.hintLabel.setMinWidth(0);
@@ -94,6 +100,7 @@ public class MainMenuController {
         gameStage.fullScreenProperty().addListener((observable, oldValue, fullscreen) ->
                 gameView.fullscreenButton.setText(fullscreen ? "Exit Fullscreen" : "Fullscreen"));
         gameView.tryAgainButton.setOnAction(event -> controller.restart());
+        gameView.nextLevelButton.setOnAction(event -> controller.nextLevel());
         gameView.menuButton.setOnAction(event -> controller.returnToMenu());
         gameStage.setOnHidden(event -> controller.stop());
         gameView.gridCanvas.setFocusTraversable(true);

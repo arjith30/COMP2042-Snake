@@ -2,7 +2,7 @@
 
 GitHub repository: https://github.com/arjith30/COMP2042-Snake
 
-The maintained JavaFX Snake game has five cartoon skins, apple collection, a grass board, keyboard controls, fullscreen support and a persistent local top-five leaderboard. The coursework brief specifies the starter at https://github.com/kooitt/CW2026. The implementation extends the existing project; the history and original attribution should be retained.
+The maintained JavaFX Snake game has five cartoon skins, apple collection, a grass board, keyboard controls, fullscreen support a persistent local top-five leaderboard, and a three-level adventure. The coursework brief specifies the starter at https://github.com/kooitt/CW2026. The implementation extends the existing project; the history and original attribution should be retained.
 
 ## Compilation instructions
 
@@ -35,10 +35,12 @@ For an existing checkout, close the game first and run `git pull` before buildin
 | Controls | WASD and arrow keys steer. P pauses; movement keys resume. Reverse input cannot turn directly into the neck. |
 | Retry | Enter after a loss or win, the Try Again button, R or Tab starts a new round with the selected skin. |
 | Fullscreen | F11 or the Fullscreen button toggles fullscreen. Plus/minus also enter/leave it. Resizing keeps the board square and centered. Esc exits fullscreen first, then returns to the menu. |
-| Local leaderboard | `Leaderboard` stores the top five completed-round scores in descending order, preserving ties. `LeaderboardView` displays them in the menu and end panel. A round is submitted once. |
-| Win handling | Filling the board wins without attempting to spawn food into a full board. |
+| Local leaderboard | `Leaderboard` stores the top five completed-round scores in descending order, preserving ties. `LeaderboardView` displays them in the menu and end panel. An adventure is submitted once after death or final victory, not at intermediate level clears. |
+| Playable levels | Open Meadow (5 apples, 7 steps/s), Hedge Gates (8 apples, 8.5 steps/s, 12 hedge cells), Garden Ruins (12 apples, 10.5 steps/s, 24 stone cells). Choose a starting level in the menu. |
+| Progression | Complete an apple objective, then press Enter or Next Level. The snake resets for each new layout, while the adventure score is retained. The final level ends the adventure. |
+| Safe food spawning | `model.FoodSpawner` selects uniformly from free cells with an injected random source. A full board returns empty rather than retrying forever. |
 
-The model starts with four occupied cells, leaving 221 apples to fill the current board. The leaderboard is local to this device, not an online service. Scores live in `data/leaderboard.txt`, relative to the launch directory; `data/` is ignored by Git. If saving fails, scores remain available for the current session and the UI reports this. Unfinished rounds are not submitted when restarting or leaving.
+The model starts each level with four occupied cells. The new goal-based adventure replaces the previous full-board victory condition. A full adventure starting at Open Meadow needs 25 apples and awards 125 points. Starting at a later level skips the earlier challenges and their points. Enter advances after an intermediate clear and retries after a loss/final victory; R, Tab and Try Again reset the adventure to the originally selected starting level. The leaderboard is local to this device, not an online service. Scores live in `data/leaderboard.txt`, relative to the launch directory; `data/` is ignored by Git. If saving fails, scores remain available for the current session and the UI reports this. Unfinished rounds are not submitted when restarting or leaving.
 
 ## Maintenance and refactoring
 
@@ -66,7 +68,11 @@ The committed JUnit Jupiter 5.11.4 suite runs through Maven Surefire 3.5.2:
 | `src/test/java/com/comp2042/model/SnakeTest.java` | 29 | Initial state, all movement directions, constant length, growth, reverse input, all walls, obstacles, self-collision, tail rules, all wrapping edges, wrapped obstacles, defensive copying, dead state and invalid inputs. |
 | `src/test/java/com/comp2042/model/DirectionTest.java` | 4 | Opposite-direction rules for every direction, including null comparisons. |
 | `src/test/java/com/comp2042/LeaderboardTest.java` | 12 | Top-five sorting, ties, persistence, missing directories, corrupt/negative/overflow rows, immutable results, write failure, recovery and zero scores. |
-| **Total** | **45** | **0 failures, 0 errors, 0 skipped** in the verified build. |
+| `src/test/java/com/comp2042/model/LevelTest.java` | 10 | Layout uniqueness/bounds, clear spawn corridor, all free cells reachable, level order, goals, speed and independent layout copies. |
+| `src/test/java/com/comp2042/model/LevelProgressTest.java` | 9 | Objective thresholds, preventing skips/extra collections, cumulative score, final victory and restoring any chosen starting level. |
+| `src/test/java/com/comp2042/model/FoodSpawnerTest.java` | 7 | Occupancy exclusion in all levels, full/nearly-full boards, deterministic randomness and invalid inputs. |
+| `src/test/java/com/comp2042/PlayableLevelsTest.java` | 6 | Game/layout integration, reset, score retention, speed changes, obstacle copies and invalid board configuration. |
+| **Total** | **77** | **0 failures, 0 errors, 0 skipped** in the verified build. |
 
 Parameterized tests count each input separately. The tests construct real model objects and use temporary score files; they do not open a display, write to the player's score file, or depend on installed fonts. No JavaFX test platform is required for `mvn test`.
 
@@ -77,11 +83,11 @@ A separate, headless JavaFX smoke check exercised the actual menu and all five s
 - Native Windows fullscreen and final manual gameplay still need confirmation on the student's computer. Earlier build/startup issues were addressed, but the final refactored version needs a fresh manual play-through.
 - The shaded JAR is produced by the build; the documented and checked launch path is the Maven JavaFX plugin. A portable standalone distribution has not been validated.
 - The leaderboard does not support names, online synchronization or simultaneous multi-process updates.
-- `Coin` and the legacy power-up classes still use the original naming. Random power-up coins are disabled in the current apple mode. `Game` and `Obstacle` still contain some presentation-related details; this session isolates the snake model, not the entire application.
+- `Coin` and the legacy power-up classes still use the original naming. Random power-up coins are disabled in the current apple mode. `Game` and `Obstacle` now have no JavaFX imports. The application UI classes remain in the original package; this is a focused migration, not a complete package redesign.
 
 ## Features / submission items not implemented
 
-- Additional playable levels and adaptive difficulty have not been added. These are candidate substantive extensions after the model work is understood and reviewed.
+- Three playable levels are now implemented. Adaptive difficulty within a level has not been added; speed increases at the level boundaries.
 - `Design.pdf`, complete generated `Javadoc/`, the student's own-voice `Demo.mp4`, and the final submission archives are not complete. They must be prepared from the final code, following the coursework brief.
 - This README is a working coursework record. The student must review its accuracy, supply personal details where required in the final submission, and describe any further work.
 
@@ -91,6 +97,9 @@ All locations below are under `src/main/java/`.
 
 | Class | Location | Purpose |
 | --- | --- | --- |
+| `model.Level` | `com/comp2042/model/Level.java` | Fixed level objectives, speed and safe obstacle layouts. |
+| `model.LevelProgress` | `com/comp2042/model/LevelProgress.java` | Adventure objective/transition/scoring rules independent of the UI. |
+| `model.FoodSpawner` | `com/comp2042/model/FoodSpawner.java` | Bounded, testable placement of food in unoccupied cells. |
 | `model.Direction` | `com/comp2042/model/Direction.java` | Grid displacement and reverse-direction rules, independent of UI keys. |
 | `model.Snake` | `com/comp2042/model/Snake.java` | Moved/refactored original snake model; atomic movement, growth and collisions. Replaces `com.comp2042.Snake`. |
 | `SnakeSkin` | `com/comp2042/SnakeSkin.java` | Five cartoon skins and continuous rendering. |
@@ -104,9 +113,10 @@ All locations below are under `src/main/java/`.
 - `GameView`: grass/apple presentation, HUD, end panel, responsive board scaling, and ownership of the selected skin.
 - `MainMenuController`: skin selection/preview, leaderboard refresh, and creation of the model/view/controller with the correct responsibilities.
 - `ViewManager`: resizable stages, fullscreen menu support, and refreshing the menu leaderboard.
-- `Game`: larger tile size, score/win/reset handling, and use of `Snake.INITIAL_LENGTH` instead of repeating the starting length.
-- `Coin`: apple presentation and imports of the extracted model; retains the existing class name for this bounded change.
-- `Obstacle` and the legacy `BlueCoin`, `GoldCoin`, `SilverCoin`, `RainbowCoin`: update snake model imports where required; their legacy feature behaviour is not redesigned in this session.
+- `Game`: pure-Java board configuration, delegation to `LevelProgress`, level speed, objectives and adventure restart. Replaces the old full-board score threshold.
+- `Coin`: uses `FoodSpawner` for bounded placement and loads artwork only when drawing; retains the starter class name.
+- `Obstacle`: owns a restorable level layout and returns deep position copies. The unused random-generation loop and its out-of-bounds generation are removed.
+- Legacy `BlueCoin`, `GoldCoin`, `SilverCoin`, `RainbowCoin`: model imports were updated earlier; power-ups remain disabled.
 
 ## Unexpected problems and resolutions
 
@@ -119,3 +129,7 @@ All locations below are under `src/main/java/`.
 ## Code understanding and AI-use record
 
 See [docs/refactoring-notes.md](docs/refactoring-notes.md) for a movement walkthrough, regression cases and design trade-offs. See [docs/ai-use-record.md](docs/ai-use-record.md) for the assistance record to review when completing the required COMP2042 AI Use Declaration Form. This record is not a substitute for that form or for being able to explain and justify the submitted implementation.
+
+## Playable-level extension evidence
+
+Developed on `feature/playable-levels`, then integrated into the playable feature branch. See [docs/playable-levels.md](docs/playable-levels.md) for the rules, design rationale, screenshots, regression tests and manual checks still needed. The headless UI check completes all levels by driving actual movement and food collection; it verifies objective pauses, Enter/button transitions, cumulative points, final-only leaderboard submission, collisions, restored obstacle layouts, all five skins and fullscreen. Native Windows gameplay still needs manual confirmation.
