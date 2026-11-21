@@ -7,9 +7,9 @@
 3. `Snake.advance` computes the next cell. If wrapping is enabled, it resolves the cell on the opposite edge before checking collisions.
 4. The model determines whether that cell contains food. This matters before checking the body because a growing snake keeps its tail in place.
 5. If the cell is blocked by a wall, obstacle or non-vacating body segment, the model becomes dead and retains its last valid positions. Otherwise, it appends the old head to the neck end of the body and removes the tail only when not growing.
-6. The controller awards five points and generates the next apple only when `advance` reports food eaten. It skips spawning on a full-board win.
+6. The controller records an apple in `LevelProgress`, which awards five points, and generates the next apple only when `advance` reports food eaten. It skips spawning on a completed level and waits for an explicit transition.
 7. `GameView` asks its selected `SnakeSkin` to draw the positions. The model does not know the skin, JavaFX scene, images or keyboard.
-8. At loss or victory, the controller records the score once and refreshes the leaderboard/end panel. Retrying creates a fresh model while the same view retains the skin.
+8. At loss or final adventure victory, the controller records the score once and refreshes the leaderboard/end panel. Retrying creates a fresh model while the same view retains the skin.
 
 ## Why one atomic step?
 
