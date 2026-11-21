@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane id="backgroundPane" maxHeight="440.0" maxWidth="850.0" minHeight="440.0" minWidth="850.0" prefHeight="440.0" prefWidth="850.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.comp2042.MainMenuController">
+<AnchorPane id="backgroundPane" maxHeight="540.0" maxWidth="850.0" minHeight="540.0" minWidth="850.0" prefHeight="540.0" prefWidth="850.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.comp2042.MainMenuController">
     <stylesheets>
         <URL value="@styling.css" />
     </stylesheets>
@@ -17,7 +17,10 @@
         <Label layoutX="155" layoutY="110" text="Choose your snake" style="-fx-font-size: 18;" />
         <ChoiceBox fx:id="skinPicker" layoutX="155" layoutY="145" prefWidth="240" accessibleText="Snake skin" />
         <Canvas fx:id="skinPreview" layoutX="145" layoutY="195" width="260" height="90" />
+        <Label layoutX="155" layoutY="300" text="Starting level" style="-fx-font-size: 18;" />
+        <ChoiceBox fx:id="levelPicker" layoutX="155" layoutY="335" prefWidth="300" accessibleText="Starting level" />
+        <Label fx:id="levelDescription" layoutX="155" layoutY="380" prefWidth="320" prefHeight="60" wrapText="true" style="-fx-font-family: Arial; -fx-font-size: 14;" />
         <VBox fx:id="leaderboardContainer" layoutX="550" layoutY="110" prefWidth="260" />
-        <Button fx:id="btn_start" layoutY="315.0" minHeight="40.0" minWidth="115.0" mnemonicParsing="false" onAction="#handleStart" prefHeight="40.0" prefWidth="115.0" styleClass="startAndQuitBtn" text="Start" textFill="WHITE" AnchorPane.leftAnchor="217.5" />
+        <Button fx:id="btn_start" layoutY="465.0" minHeight="40.0" minWidth="115.0" mnemonicParsing="false" onAction="#handleStart" prefHeight="40.0" prefWidth="115.0" styleClass="startAndQuitBtn" text="Start" textFill="WHITE" AnchorPane.leftAnchor="217.5" />
     </children>
 </AnchorPane>

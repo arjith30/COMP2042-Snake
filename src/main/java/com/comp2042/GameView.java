@@ -1,6 +1,7 @@
 package com.comp2042;
 
 import com.comp2042.model.Snake;
+import com.comp2042.model.Level;
 
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -16,8 +17,8 @@ import java.awt.Point;
 public class GameView {
     public Canvas gridCanvas;
     public GraphicsContext gc;
-    public Label gameOverLabel, gameWonLabel, scoreLabel, hintLabel;
-    public Button tryAgainButton, menuButton, fullscreenButton;
+    public Label gameOverLabel, gameWonLabel, scoreLabel, hintLabel, levelLabel;
+    public Button tryAgainButton, menuButton, fullscreenButton, nextLevelButton;
     public VBox endPanel;
     private LeaderboardView leaderboard;
     private Label endMessage;
@@ -41,17 +42,20 @@ public class GameView {
         gameOverLabel.setVisible(false); gameOverLabel.setManaged(false);
         gameWonLabel.setVisible(false); gameWonLabel.setManaged(false);
         scoreLabel = new Label(); scoreLabel.setId("scoreLabel");
+        levelLabel = new Label(); levelLabel.setId("levelLabel");
         hintLabel = new Label("WASD / arrows  •  P pause  •  F11 fullscreen");
         hintLabel.setId("hintLabel");
         fullscreenButton = new Button("Fullscreen"); fullscreenButton.setId("fullscreenButton");
         fullscreenButton.setFocusTraversable(false);
         tryAgainButton = new Button("Try Again"); tryAgainButton.setId("tryAgainButton");
-        menuButton = new Button("Choose Skin"); menuButton.setId("chooseSkinButton");
+        menuButton = new Button("Menu / Levels"); menuButton.setId("chooseSkinButton");
+        nextLevelButton = new Button("Next Level"); nextLevelButton.setId("nextLevelButton");
+        nextLevelButton.setFocusTraversable(false); nextLevelButton.setVisible(false); nextLevelButton.setManaged(false);
         // Buttons never steal the arrow keys needed to steer after restarting.
         tryAgainButton.setFocusTraversable(false); menuButton.setFocusTraversable(false);
         endMessage = new Label("Your score: 0"); endMessage.setId("endMessage");
         leaderboard = new LeaderboardView();
-        endPanel = new VBox(10, gameOverLabel, gameWonLabel, endMessage, leaderboard, tryAgainButton, menuButton);
+        endPanel = new VBox(10, gameOverLabel, gameWonLabel, endMessage, leaderboard, nextLevelButton, tryAgainButton, menuButton);
         endPanel.setAlignment(Pos.CENTER); endPanel.setMaxSize(360, javafx.scene.layout.Region.USE_PREF_SIZE);
         endPanel.setId("endPanel"); endPanel.setVisible(false); endPanel.setManaged(false);
         updateScoreLabel(); drawGrid(apple, snake, gc);
@@ -78,9 +82,24 @@ public class GameView {
         displayedObstacle = obstacle;
         drawGrid(apple, snake, context);
         double tile = game.getMultiplier() * fullScale;
-        context.setFill(Color.web("#486745"));
-        for (Point point : obstacle.getObstacles())
-            context.fillRoundRect(point.x * tile + 2, point.y * tile + 2, tile - 4, tile - 4, 10, 10);
+        for (Point point : obstacle.getObstacles()) {
+            double x = point.x * tile, y = point.y * tile;
+            boolean hedge = game.getLevel() == Level.HEDGES;
+            context.setFill(Color.web(hedge ? "#234d32" : "#48544e"));
+            context.fillRoundRect(x + 1, y + 1, tile - 2, tile - 2, tile * .3, tile * .3);
+            context.setFill(Color.web(hedge ? "#3e8650" : "#929e8c"));
+            context.fillRoundRect(x + 4, y + 3, tile - 8, tile - 8, tile * .25, tile * .25);
+            if (hedge) {
+                context.setFill(Color.web("#74b859"));
+                context.fillOval(x + tile * .2, y + tile * .15, tile * .25, tile * .18);
+                context.fillOval(x + tile * .58, y + tile * .54, tile * .2, tile * .14);
+            } else {
+                context.setStroke(Color.web("#c3ccad")); context.setLineWidth(Math.max(1, tile * .045));
+                context.strokeLine(x + tile * .2, y + tile * .25, x + tile * .7, y + tile * .25);
+                context.setFill(Color.web("#4d8149"));
+                context.fillOval(x + tile * .6, y + tile * .65, tile * .25, tile * .15);
+            }
+        }
     }
 
     private void drawGrid(Coin apple, Snake snake, GraphicsContext context) {
@@ -111,20 +130,29 @@ public class GameView {
         updateEndPanel();
     }
     public void gameWon() {
-        gameWonLabel.setVisible(game.gameWon()); gameWonLabel.setManaged(game.gameWon());
+        gameWonLabel.setText(game.gameWon() ? "ADVENTURE WON!" : "LEVEL COMPLETE");
+        gameWonLabel.setVisible(game.isLevelComplete()); gameWonLabel.setManaged(game.isLevelComplete());
         updateEndPanel();
     }
     private void updateEndPanel() {
         boolean show = gameOverLabel.isVisible() || gameWonLabel.isVisible();
         endPanel.setVisible(show); endPanel.setManaged(show);
-        if (show) hintLabel.setText("Enter to try again  •  Esc for skins");
+        boolean continuing = !gameOverLabel.isVisible() && game.hasNextLevel();
+        nextLevelButton.setVisible(continuing); nextLevelButton.setManaged(continuing);
+        leaderboard.setVisible(!continuing); leaderboard.setManaged(!continuing);
+        tryAgainButton.setText(continuing ? "Restart Adventure" : "Try Again");
+        if (show) {
+            endMessage.setText("Score: " + game.getScorePoints() + "  •  Total apples: " + game.getScore());
+            hintLabel.setText(continuing ? "Enter for next level  •  R to restart" : "Enter to try again  •  Esc for levels");
+        }
     }
     public void refreshLeaderboard() {
         leaderboard.refresh();
         endMessage.setText("Your score: " + game.getScorePoints() + "  •  Apples: " + game.getScore());
     }
     public void updateScoreLabel() {
-        scoreLabel.setText("Apples: " + game.getScore() + "    Score: " + game.getScorePoints());
+        scoreLabel.setText("Score: " + game.getScorePoints());
+        levelLabel.setText(game.getLevel() + "  •  " + game.getLevelApples() + "/" + game.getLevel().goal() + " apples");
     }
     public void showReady() { hintLabel.setText("WASD / arrows  •  P pause  •  F11 fullscreen"); }
 }

@@ -33,11 +33,11 @@ public class GameController {
     }
 
     private void tick() {
-        if (snek.isDead() || game.gameWon()) { animation.stop(); return; }
+        if (snek.isDead() || game.isLevelComplete()) { animation.stop(); return; }
         if (snek.advance(directionFor(key), coin.getPos(), obstacle.getObstacles())) {
-            game.incScore(); game.addPoints(coin.getPoints());
-            // Do not search for a free spawn cell after filling the entire board.
-            if (!game.gameWon()) coin = new Coin(game.getWidth(), game.getHeight(), snek, obstacle);
+            game.incScore();
+            // Wait for an explicit level transition once the current objective is complete.
+            if (!game.isLevelComplete()) coin = new Coin(game.getWidth(), game.getHeight(), snek, obstacle);
         }
         keyPressed = false;
         gameView.drawGrid(coin, snek, obstacle, gameView.gc, false, 0);
@@ -47,7 +47,7 @@ public class GameController {
             gameView.refreshLeaderboard();
         }
         gameView.updateScoreLabel(); gameView.gameOver(snek); gameView.gameWon();
-        if (snek.isDead() || game.gameWon()) animation.stop();
+        if (snek.isDead() || game.isLevelComplete()) animation.stop();
     }
 
     public void handle(KeyEvent event) {
@@ -58,8 +58,10 @@ public class GameController {
             case D -> KeyCode.RIGHT;
             default -> event.getCode();
         };
-        if (pressed == KeyCode.ENTER && (snek.isDead() || game.gameWon())) {
-            restart(); event.consume(); return;
+        if (pressed == KeyCode.ENTER && (snek.isDead() || game.isLevelComplete())) {
+            if (!snek.isDead() && game.hasNextLevel()) nextLevel();
+            else restart();
+            event.consume(); return;
         }
         if (pressed == KeyCode.F11) {
             toggleFullscreen(); event.consume(); return;
@@ -76,7 +78,7 @@ public class GameController {
         if (pressed == KeyCode.MINUS || pressed == KeyCode.SUBTRACT) {
             gameView.scaleToFullscreen(false, stage, obstacle, snek, coin); event.consume(); return;
         }
-        if (snek.isDead() || game.gameWon()) return;
+        if (snek.isDead() || game.isLevelComplete()) return;
         if (pressed == KeyCode.P) {
             animation.pause(); gameView.hintLabel.setText("Paused  •  WASD or arrows to resume");
         }
@@ -103,11 +105,22 @@ public class GameController {
     }
 
     public void restart() {
+        game.resetScore(); scoreRecorded = false;
+        startCurrentLevel();
+    }
+
+    public void nextLevel() {
+        if (snek.isDead() || !game.hasNextLevel()) return;
+        game.advanceLevel();
+        startCurrentLevel();
+    }
+
+    private void startCurrentLevel() {
         animation.stop(); animation.jumpTo(Duration.ZERO);
-        obstacle.reset(); game.resetScore();
+        obstacle.setLevel(game.getLevel());
         snek = new Snake(game.getWidth(), game.getHeight(), game.isNoBorder());
         coin = new Coin(game.getWidth(), game.getHeight(), snek, obstacle);
-        key = lastKey = KeyCode.LEFT; keyPressed = false; scoreRecorded = false;
+        key = lastKey = KeyCode.LEFT; keyPressed = false;
         animation.setRate(game.getSpeed());
         gameView.gameOver(snek); gameView.gameWon(); gameView.updateScoreLabel(); gameView.showReady();
         gameView.drawGrid(coin, snek, obstacle, gameView.gc, false, 0);

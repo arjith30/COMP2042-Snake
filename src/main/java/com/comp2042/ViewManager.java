@@ -37,7 +37,7 @@ public class ViewManager {
             exception.printStackTrace();
         }
 
-        Scene mainScene = new Scene(new StackPane(root), 850, 440);
+        Scene mainScene = new Scene(new StackPane(root), 850, 540);
         mainScene.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
             if (event.getCode() == KeyCode.F11) {
                 primaryStage.setFullScreen(!primaryStage.isFullScreen()); event.consume();
