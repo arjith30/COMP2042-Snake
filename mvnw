@@ -203,7 +203,7 @@ fi
 # Extension to allow automatically downloading the maven-wrapper.jar from Maven-central
 # This allows using the maven wrapper in projects that prohibit checking in binary data.
 ##########################################################################################
-if [ -r "$BASE_DIR/.mvn/wrapper/maven-wrapper.jar" ]; then
+if [ -s "$BASE_DIR/.mvn/wrapper/maven-wrapper.jar" ]; then
     if [ "$MVNW_VERBOSE" = true ]; then
       echo "Found .mvn/wrapper/maven-wrapper.jar"
     fi
@@ -217,7 +217,7 @@ else
       jarUrl="https://repo.maven.apache.org/maven2/io/takari/maven-wrapper/0.5.6/maven-wrapper-0.5.6.jar"
     fi
     while IFS="=" read key value; do
-      case "$key" in (wrapperUrl) jarUrl="$value"; break ;;
+      case "$key" in (wrapperUrl) jarUrl=$(printf '%s' "$value" | tr -d '\r'); break ;;
       esac
     done < "$BASE_DIR/.mvn/wrapper/maven-wrapper.properties"
     if [ "$MVNW_VERBOSE" = true ]; then
@@ -273,6 +273,10 @@ else
             fi
         fi
     fi
+fi
+if [ ! -s "$BASE_DIR/.mvn/wrapper/maven-wrapper.jar" ]; then
+    echo "Error: Maven wrapper download failed. Check your network and retry." >&2
+    exit 1
 fi
 ##########################################################################################
 # End of extension

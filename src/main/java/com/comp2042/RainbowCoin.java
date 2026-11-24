@@ -1,5 +1,7 @@
 package com.comp2042;
 
+import com.comp2042.model.Snake;
+
 import javafx.scene.image.Image;
 
 public class RainbowCoin extends Coin {

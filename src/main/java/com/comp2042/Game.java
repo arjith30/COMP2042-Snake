@@ -1,92 +1,52 @@
 package com.comp2042;
 
-import javafx.scene.paint.Color;
+import com.comp2042.model.Level;
+import com.comp2042.model.LevelProgress;
+import java.util.Objects;
 
-public class Game {
-    private Color color = Color.web("feffe4");
-    private int width;
-    private int height;
-    private int score;
-    private int maxScore;
-    private double multiplier;
-    private int scorePoints;
-    private double speed;
-    private boolean powerUp;
-    private boolean noBorder;
+/** Board configuration and adventure progress; independent of JavaFX. */
+public final class Game {
+    private final int width;
+    private final int height;
+    private final LevelProgress progress;
 
-    public Game(int x, int y, boolean powerUp, char difficulty) {
-        if (difficulty == 'E') {
-            speed = 8.5;
-            noBorder = true;
-        } else if (difficulty == 'N') {
-            speed = 8.5;
-            noBorder = false;
-        } else if (difficulty == 'H') {
-            speed = 13;
-            noBorder = false;
-        }
-        this.powerUp = powerUp;
-        width = x;
-        height = y;
-        maxScore = x * y - 2;
-        this.powerUp = powerUp;
-        if (height > 50) {
-            multiplier = 10;
-        } else {
-            multiplier = 20;
-        }
+    /**
+     * @param width board columns, at least 15
+     * @param height board rows, at least 15
+     * @param startingLevel challenge chosen in the menu
+     */
+    public Game(int width, int height, Level startingLevel) {
+        Objects.requireNonNull(startingLevel, "startingLevel").obstacles(width, height);
+        this.width = width; this.height = height; this.progress = new LevelProgress(startingLevel);
     }
-
-    public boolean gameWon() {
-        return score == maxScore;
-    }
-
-    public void incScore() {
-        score++;
-    }
-
-    public void decMaxScore(int num) {
-        this.maxScore -= (num - 1);
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
-    }
-
-    public void resetScore() {
-        score = 0;
-        scorePoints = 0;
-    }
-
-    public Color getColor() {
-        return color;
-    }
-
-    public double getMultiplier() {
-        return multiplier;
-    }
-
-    public void addPoints(int n) {
-        scorePoints += n;
-    }
-
-    public int getScorePoints() {
-        return scorePoints;
-    }
-
-    public boolean isPowerUp() {
-        return powerUp;
-    }
-
-    public double getSpeed() {
-        return speed;
-    }
-
-    public boolean isNoBorder() {
-        return noBorder;
-    }
+    /** @return whether the final challenge has been completed */
+    public boolean gameWon() { return progress.isAdventureComplete(); }
+    /** @return whether the current apple objective has been met */
+    public boolean isLevelComplete() { return progress.isLevelComplete(); }
+    /** @return whether a completed challenge can advance to another level */
+    public boolean hasNextLevel() { return isLevelComplete() && getLevel().next() != null; }
+    /** @return whether progression advanced; an incomplete objective throws IllegalStateException */
+    public boolean advanceLevel() { return progress.advance(); }
+    /** Records one apple and awards its points through the progress model. */
+    public void incScore() { progress.collectApple(); }
+    /** Restarts the originally selected adventure, clearing all accumulated points. */
+    public void resetScore() { progress.reset(); }
+    /** @return the active obstacle/speed/objective definition */
+    public Level getLevel() { return progress.level(); }
+    /** @return apples collected since entering the active level */
+    public int getLevelApples() { return progress.levelApples(); }
+    /** @return the number of board columns */
+    public int getWidth() { return width; }
+    /** @return the number of board rows */
+    public int getHeight() { return height; }
+    /** @return the default windowed cell size in pixels, before responsive scaling */
+    public double getMultiplier() { return 44; }
+    /** @return apples collected across this adventure */
+    public int getScore() { return progress.totalApples(); }
+    /** @return five points per collected apple across this adventure */
+    public int getScorePoints() { return progress.points(); }
+    /** @return movement steps per second for the active level */
+    public double getSpeed() { return getLevel().speed(); }
+    /** @return false because all three challenges have solid boundary walls */
+    public boolean isNoBorder() { return false; }
 }

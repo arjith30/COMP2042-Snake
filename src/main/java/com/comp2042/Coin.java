@@ -1,36 +1,20 @@
 package com.comp2042;
 
+import com.comp2042.model.FoodSpawner;
+import com.comp2042.model.LevelProgress;
+import com.comp2042.model.Snake;
 import javafx.scene.image.Image;
+import java.awt.Point;
+import java.util.concurrent.ThreadLocalRandom;
 
-import java.awt.*;
-import java.util.Random;
-
+/** Retains the starter food API while using safe apple placement and lazy artwork. */
 public class Coin {
-    private Point pos;
-    private Image image = new Image("resources/views/res/redcoin.png");
-
-    public Coin(int x, int y, Snake snek, Obstacle obstacle) {
-        int tx;
-        int ty;
-        do {
-            Random rnd = new Random();
-
-            tx = rnd.nextInt(x);
-            ty = rnd.nextInt(y);
-            pos = new Point(tx, ty);
-        } while (snek.getHead().equals(pos) || snek.getBody().contains(pos) || obstacle.getObstacles().contains(pos));
+    private final Point pos;
+    public Coin(int width, int height, Snake snake, Obstacle obstacle) {
+        pos = FoodSpawner.choose(width, height, snake, obstacle.getObstacles(), ThreadLocalRandom.current())
+                .orElseThrow(() -> new IllegalStateException("No free cell remains for food"));
     }
-
-    public Point getPos() {
-        return new Point(pos);
-    }
-
-    public int getPoints() {
-        int points = 5;
-        return points;
-    }
-
-    public Image getImage() {
-        return image;
-    }
+    public Point getPos() { return new Point(pos); }
+    public int getPoints() { return LevelProgress.POINTS_PER_APPLE; }
+    public Image getImage() { return AppleArt.image(); }
 }

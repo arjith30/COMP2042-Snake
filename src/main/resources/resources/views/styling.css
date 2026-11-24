@@ -64,3 +64,136 @@
     -fx-font-family: "SF Pixelate";
     -fx-font-size: 20;
 }
+
+/* Keep the menu's large title typography out of the skin selector. */
+.choice-box .label {
+    -fx-font-family: "SF Pixelate";
+    -fx-font-size: 16;
+}
+.choice-box {
+    -fx-background-color: #fff4dc;
+    -fx-border-color: #b87431;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+}
+
+#gameHud {
+    -fx-background-color: #274b32;
+    -fx-padding: 10 14;
+}
+#scoreLabel {
+    -fx-font-family: "Arial";
+    -fx-font-size: 18;
+    -fx-font-weight: bold;
+    -fx-text-fill: #fff4cf;
+}
+#hintLabel {
+    -fx-font-family: "Arial";
+    -fx-font-size: 12;
+    -fx-text-fill: #d7edc7;
+}
+#endPanel {
+    -fx-background-color: rgba(255, 250, 228, 0.97);
+    -fx-background-radius: 24;
+    -fx-border-color: #416a39;
+    -fx-border-width: 3;
+    -fx-border-radius: 24;
+    -fx-padding: 26;
+    -fx-effect: dropshadow(gaussian, rgba(22, 50, 23, 0.35), 24, 0, 0, 7);
+}
+#endPanel .label {
+    -fx-font-family: "Arial";
+    -fx-font-size: 28;
+    -fx-font-weight: bold;
+    -fx-text-fill: #274b32;
+}
+#endPanel #endMessage {
+    -fx-font-size: 16;
+    -fx-font-weight: normal;
+}
+#endPanel .button {
+    -fx-font-family: "Arial";
+    -fx-font-size: 19;
+    -fx-font-weight: bold;
+    -fx-background-image: none;
+    -fx-background-color: #307944;
+    -fx-background-radius: 12;
+    -fx-padding: 12 30;
+    -fx-cursor: hand;
+}
+#endPanel .button:hover { -fx-background-color: #246337; }
+#endPanel #chooseSkinButton {
+    -fx-background-color: #e3edcf;
+    -fx-text-fill: #274b32;
+    -fx-font-size: 15;
+}
+
+#fullscreenButton {
+    -fx-font-family: "Arial";
+    -fx-font-size: 12;
+    -fx-font-weight: bold;
+    -fx-background-image: none;
+    -fx-background-color: #e3edcf;
+    -fx-text-fill: #274b32;
+    -fx-background-radius: 8;
+    -fx-padding: 8 10;
+    -fx-cursor: hand;
+}
+#fullscreenButton:hover { -fx-background-color: #fff4cf; }
+
+.leaderboard {
+    -fx-background-color: #edf2da;
+    -fx-background-radius: 14;
+    -fx-padding: 14 18;
+}
+.leaderboard .label, #endPanel .leaderboard .label {
+    -fx-font-family: "Arial";
+    -fx-font-size: 15;
+    -fx-font-weight: bold;
+    -fx-text-fill: #274b32;
+}
+.leaderboard .leaderboard-title, #endPanel .leaderboard .leaderboard-title {
+    -fx-font-size: 18;
+    -fx-padding: 0 0 5 0;
+}
+.leaderboard-row { -fx-padding: 2 0; }
+.leaderboard .leaderboard-rank, #endPanel .leaderboard .leaderboard-rank {
+    -fx-text-fill: #658050;
+}
+.leaderboard .leaderboard-status, #endPanel .leaderboard .leaderboard-status {
+    -fx-font-size: 11;
+    -fx-font-weight: normal;
+    -fx-padding: 5 0 0 0;
+}
+#endPanel { -fx-padding: 18; }
+#endPanel .button { -fx-padding: 10 26; }
+#endPanel .leaderboard { -fx-padding: 8 14; -fx-spacing: 2; }
+#endPanel .leaderboard-row {
+    -fx-padding: 0;
+    -fx-min-height: 20;
+    -fx-pref-height: 20;
+    -fx-max-height: 20;
+}
+#endPanel .leaderboard .label { -fx-font-size: 14; }
+#endPanel .leaderboard .leaderboard-title { -fx-font-size: 16; -fx-padding: 0 0 3 0; }
+#endPanel .leaderboard .leaderboard-status { -fx-font-size: 10; -fx-padding: 3 0 0 0; }
+
+#levelLabel {
+    -fx-font-family: "Arial";
+    -fx-font-size: 12;
+    -fx-font-weight: bold;
+    -fx-text-fill: #d7edc7;
+}
+
+.music-toggle {
+    -fx-font-family: "Arial";
+    -fx-font-size: 12;
+    -fx-font-weight: bold;
+    -fx-background-image: none;
+    -fx-background-color: #e3edcf;
+    -fx-text-fill: #274b32;
+    -fx-background-radius: 8;
+    -fx-padding: 8 10;
+    -fx-cursor: hand;
+}
+.music-toggle:hover { -fx-background-color: #fff4cf; }

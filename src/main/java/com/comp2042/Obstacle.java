@@ -1,45 +1,26 @@
 package com.comp2042;
 
-import javafx.scene.paint.Color;
-
-import java.awt.*;
+import com.comp2042.model.Level;
+import java.awt.Point;
 import java.util.ArrayList;
-import java.util.Random;
+import java.util.Objects;
 
-public class Obstacle {
-    private Color color = Color.BLACK;
-    private ArrayList<Point> obstacles = new ArrayList<>();
-    private int x;
-    private int y;
+/** Restorable obstacle layout for the active challenge. */
+public final class Obstacle {
+    private final int width;
+    private final int height;
+    private Level level;
+    private ArrayList<Point> obstacles;
 
-    public Obstacle(int x, int y) {
-       this.x = x;
-       this.y = y;
+    public Obstacle(int width, int height) { this(width, height, Level.MEADOW); }
+    public Obstacle(int width, int height, Level level) {
+        this.width = width; this.height = height; setLevel(level);
     }
-
-    public void newObstacles(Snake snek, Coin coin, int amount) {
-        if (obstacles.size() > 50) {
-            return;
-        }
-        Random rnd = new Random();
-        Point p;
-        for (int i=0; i<amount; i++) {
-            do {
-                p = new Point(rnd.nextInt(x) + 1, rnd.nextInt(y));
-            } while (coin.getPos().equals(p) || snek.getBody().contains(p) || snek.getHead().equals(p));
-            obstacles.add(p);
-        }
-    }
-
-    public Color getColor() {
-        return color;
-    }
-
+    public void setLevel(Level level) { this.level = Objects.requireNonNull(level, "level"); reset(); }
     public ArrayList<Point> getObstacles() {
-        return obstacles;
+        ArrayList<Point> copy = new ArrayList<>();
+        for (Point point : obstacles) copy.add(new Point(point));
+        return copy;
     }
-
-    public void reset() {
-        obstacles.clear();
-    }
+    public void reset() { obstacles = new ArrayList<>(level.obstacles(width, height)); }
 }
