@@ -2,7 +2,7 @@
 
 GitHub repository: https://github.com/arjith30/COMP2042-Snake
 
-The maintained JavaFX Snake game has five cartoon skins, apple collection, a grass board, keyboard controls, fullscreen support a persistent local top-five leaderboard, and a three-level adventure. The coursework brief specifies the starter at https://github.com/kooitt/CW2026. The implementation extends the existing project; the history and original attribution should be retained.
+The maintained JavaFX Snake game has five cartoon skins, apple collection, three level backgrounds, keyboard controls, fullscreen support a persistent local top-five leaderboard, and a three-level adventure. The coursework brief specifies the starter at https://github.com/kooitt/CW2026. The implementation extends the existing project; the history and original attribution should be retained.
 
 ## Compilation instructions
 
@@ -31,16 +31,17 @@ For an existing checkout, close the game first and run `git pull` before buildin
 | --- | --- |
 | Five skins | Orange Pop, Mr. Bones, Cosmic, Candy Pop and Jade Dragon. `SnakeSkin` renders one continuous body with facial features, clipped markings and consistent base colours. `MainMenuController` supplies the selected skin to `GameView`. |
 | Apple collection | `Coin` supplies apple positions; `AppleArt` supplies cached artwork. Each apple grows the snake by one segment and awards five points. |
-| Grass board | `GameView` draws a 15 × 15 board with a default tile size of 44px and a separate HUD. |
+| Level backgrounds | `BoardBackground` draws green meadow, autumn orchard and blue courtyard grids. The 15 × 15 board uses a default cell size of 44px with responsive scaling. |
 | Controls | WASD and arrow keys steer. P pauses; movement keys resume. Reverse input cannot turn directly into the neck. |
 | Retry | Enter after a loss or win, the Try Again button, R or Tab starts a new round with the selected skin. |
 | Fullscreen | F11 or the Fullscreen button toggles fullscreen. Plus/minus also enter/leave it. Resizing keeps the board square and centered. Esc exits fullscreen first, then returns to the menu. |
 | Local leaderboard | `Leaderboard` stores the top five completed-round scores in descending order, preserving ties. `LeaderboardView` displays them in the menu and end panel. An adventure is submitted once after death or final victory, not at intermediate level clears. |
-| Playable levels | Open Meadow (5 apples, 7 steps/s), Hedge Gates (8 apples, 8.5 steps/s, 12 hedge cells), Garden Ruins (12 apples, 10.5 steps/s, 24 stone cells). Choose a starting level in the menu. |
+| Playable levels | Open Meadow (5 apples, 7 steps/s), Hedge Gates (8 apples, 8.5 steps/s, 12 hedge cells), Garden Ruins (10 apples, 9 steps/s, 16 stone cells). Choose a starting level in the menu. |
+| Background music | One quiet, bundled PCM loop plays across the menu and levels. M or the music buttons mute/resume it; audio failure leaves gameplay usable. |
 | Progression | Complete an apple objective, then press Enter or Next Level. The snake resets for each new layout, while the adventure score is retained. The final level ends the adventure. |
 | Safe food spawning | `model.FoodSpawner` selects uniformly from free cells with an injected random source. A full board returns empty rather than retrying forever. |
 
-The model starts each level with four occupied cells. The new goal-based adventure replaces the previous full-board victory condition. A full adventure starting at Open Meadow needs 25 apples and awards 125 points. Starting at a later level skips the earlier challenges and their points. Enter advances after an intermediate clear and retries after a loss/final victory; R, Tab and Try Again reset the adventure to the originally selected starting level. The leaderboard is local to this device, not an online service. Scores live in `data/leaderboard.txt`, relative to the launch directory; `data/` is ignored by Git. If saving fails, scores remain available for the current session and the UI reports this. Unfinished rounds are not submitted when restarting or leaving.
+The model starts each level with four occupied cells. The new goal-based adventure replaces the previous full-board victory condition. A full adventure starting at Open Meadow needs 23 apples and awards 115 points. Starting at a later level skips the earlier challenges and their points. Enter advances after an intermediate clear and retries after a loss/final victory; R, Tab and Try Again reset the adventure to the originally selected starting level. The leaderboard is local to this device, not an online service. Scores live in `data/leaderboard.txt`, relative to the launch directory; `data/` is ignored by Git. If saving fails, scores remain available for the current session and the UI reports this. Unfinished rounds are not submitted when restarting or leaving.
 
 ## Maintenance and refactoring
 
@@ -68,11 +69,12 @@ The committed JUnit Jupiter 5.11.4 suite runs through Maven Surefire 3.5.2:
 | `src/test/java/com/comp2042/model/SnakeTest.java` | 29 | Initial state, all movement directions, constant length, growth, reverse input, all walls, obstacles, self-collision, tail rules, all wrapping edges, wrapped obstacles, defensive copying, dead state and invalid inputs. |
 | `src/test/java/com/comp2042/model/DirectionTest.java` | 4 | Opposite-direction rules for every direction, including null comparisons. |
 | `src/test/java/com/comp2042/LeaderboardTest.java` | 12 | Top-five sorting, ties, persistence, missing directories, corrupt/negative/overflow rows, immutable results, write failure, recovery and zero scores. |
-| `src/test/java/com/comp2042/model/LevelTest.java` | 10 | Layout uniqueness/bounds, clear spawn corridor, all free cells reachable, level order, goals, speed and independent layout copies. |
+| `src/test/java/com/comp2042/model/LevelTest.java` | 11 | Layout uniqueness/bounds, clear spawn corridor, all free cells reachable, level order, goals, speed and independent layout copies. |
 | `src/test/java/com/comp2042/model/LevelProgressTest.java` | 9 | Objective thresholds, preventing skips/extra collections, cumulative score, final victory and restoring any chosen starting level. |
 | `src/test/java/com/comp2042/model/FoodSpawnerTest.java` | 7 | Occupancy exclusion in all levels, full/nearly-full boards, deterministic randomness and invalid inputs. |
 | `src/test/java/com/comp2042/PlayableLevelsTest.java` | 6 | Game/layout integration, reset, score retention, speed changes, obstacle copies and invalid board configuration. |
-| **Total** | **77** | **0 failures, 0 errors, 0 skipped** in the verified build. |
+| `src/test/java/com/comp2042/audio/BackgroundMusicTest.java` | 11 | Playback lifecycle with an injected backend, mute/resume, failure fallback, disposal and bundled PCM resource format. |
+| **Total** | **89** | **0 failures, 0 errors, 0 skipped** in the verified build. |
 
 Parameterized tests count each input separately. The tests construct real model objects and use temporary score files; they do not open a display, write to the player's score file, or depend on installed fonts. No JavaFX test platform is required for `mvn test`.
 
@@ -80,7 +82,7 @@ A separate, headless JavaFX smoke check exercised the actual menu and all five s
 
 ## Implemented but not fully verified / known limitations
 
-- Native Windows fullscreen and final manual gameplay still need confirmation on the student's computer. Earlier build/startup issues were addressed, but the final refactored version needs a fresh manual play-through.
+- Audible music playback, native Windows fullscreen and final manual gameplay still need confirmation on the student's computer. Earlier build/startup issues were addressed, but the final refactored version needs a fresh manual play-through.
 - The shaded JAR is produced by the build; the documented and checked launch path is the Maven JavaFX plugin. A portable standalone distribution has not been validated.
 - The leaderboard does not support names, online synchronization or simultaneous multi-process updates.
 - `Coin` and the legacy power-up classes still use the original naming. Random power-up coins are disabled in the current apple mode. `Game` and `Obstacle` now have no JavaFX imports. The application UI classes remain in the original package; this is a focused migration, not a complete package redesign.
@@ -97,6 +99,8 @@ All locations below are under `src/main/java/`.
 
 | Class | Location | Purpose |
 | --- | --- | --- |
+| `BoardBackground` | `com/comp2042/BoardBackground.java` | Stable, decorative backgrounds for each level. |
+| `audio.BackgroundMusic` | `com/comp2042/audio/BackgroundMusic.java` | Owns a single looping player, shared mute state, fallback and cleanup; supports an injected backend for tests. |
 | `model.Level` | `com/comp2042/model/Level.java` | Fixed level objectives, speed and safe obstacle layouts. |
 | `model.LevelProgress` | `com/comp2042/model/LevelProgress.java` | Adventure objective/transition/scoring rules independent of the UI. |
 | `model.FoodSpawner` | `com/comp2042/model/FoodSpawner.java` | Bounded, testable placement of food in unoccupied cells. |
@@ -112,7 +116,8 @@ All locations below are under `src/main/java/`.
 - `GameController`: keyboard translation, atomic model stepping, score updates, retry, fullscreen and once-per-round leaderboard submission.
 - `GameView`: grass/apple presentation, HUD, end panel, responsive board scaling, and ownership of the selected skin.
 - `MainMenuController`: skin selection/preview, leaderboard refresh, and creation of the model/view/controller with the correct responsibilities.
-- `ViewManager`: resizable stages, fullscreen menu support, and refreshing the menu leaderboard.
+- `ViewManager`: resizable stages, fullscreen, menu leaderboard refresh, and shared music-button bindings.
+- `Main`: starts the shared music service after showing the menu and disposes it on shutdown.
 - `Game`: pure-Java board configuration, delegation to `LevelProgress`, level speed, objectives and adventure restart. Replaces the old full-board score threshold.
 - `Coin`: uses `FoodSpawner` for bounded placement and loads artwork only when drawing; retains the starter class name.
 - `Obstacle`: owns a restorable level layout and returns deep position copies. The unused random-generation loop and its out-of-bounds generation are removed.
@@ -133,3 +138,7 @@ See [docs/refactoring-notes.md](docs/refactoring-notes.md) for a movement walkth
 ## Playable-level extension evidence
 
 Developed on `feature/playable-levels`, then integrated into the playable feature branch. See [docs/playable-levels.md](docs/playable-levels.md) for the rules, design rationale, screenshots, regression tests and manual checks still needed. The headless UI check completes all levels by driving actual movement and food collection; it verifies objective pauses, Enter/button transitions, cumulative points, final-only leaderboard submission, collisions, restored obstacle layouts, all five skins and fullscreen. Native Windows gameplay still needs manual confirmation.
+
+## Difficulty, music and theme update
+
+Garden Ruins is now more forgiving: 10 apples, 9 steps/second and 16 stone cells, with a five-row horizontal corridor and three-column vertical escape lane. [docs/music-and-themes.md](docs/music-and-themes.md) records the implementation and verification. Music is generated without external samples by `tools/generate_music.py`; the bundled WAV means Python is not required to build or play. M toggles music in the menu or game. Audio is intentionally quiet and independent of the game timer. Mute persists while navigating this app session, not after quitting.

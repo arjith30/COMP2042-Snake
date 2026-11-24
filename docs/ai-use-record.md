@@ -27,3 +27,7 @@ Record which suggestions you accepted, changed or rejected; your own testing and
 ## Playable-level session — 22 November 2026
 
 At the student's request to update the program with substantive coursework work, ChatGPT/Codex designed and implemented three selectable/progressive levels, goals and increasing speed, hedge/stone layouts, transitions, cumulative adventure scoring and final-only leaderboard submission. It extracted pure-Java level/progress/food-placement logic, replaced the unbounded food retry loop, added 32 JUnit cases (77 total), ran model/UI checks and updated the README and extension notes. The student still needs to review the implementation, test on Windows and record their own contributions and understanding in the required declaration form.
+
+## Difficulty, backgrounds and music session — 24 November 2026
+
+At the student's request, ChatGPT/Codex reduced the final level's goal, speed and obstacles, widened its passages, added distinct level backgrounds, and generated an original sample-free music loop using a committed Python synthesizer script. It implemented one shared JavaFX music service, M-key/menu/HUD mute controls, shutdown cleanup, injectable audio testing and graceful audio failure handling. It added a wide-corridor regression test and 11 music/resource tests (89 total), updated screenshots/documentation, and ran model/UI checks. Audible Windows playback and personal play-testing still require the student's own verification.
