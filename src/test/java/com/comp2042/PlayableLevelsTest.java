@@ -32,7 +32,7 @@ class PlayableLevelsTest {
         Obstacle obstacle=new Obstacle(15,15,Level.RUINS);
         var copy=obstacle.getObstacles();copy.get(0).setLocation(-1,-1);copy.clear();
         assertEquals(Level.RUINS.obstacles(15,15),obstacle.getObstacles());
-        obstacle.reset();assertEquals(24,obstacle.getObstacles().size());
+        obstacle.reset();assertEquals(16,obstacle.getObstacles().size());
         assertTrue(obstacle.getObstacles().stream().noneMatch(p->p.equals(new Point(-1,-1))));
     }
 

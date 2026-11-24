@@ -11,14 +11,24 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class LevelTest {
     @Test void challengesHaveDistinctGoalsSpeedsAndOrderedProgression() {
-        assertEquals(5, Level.MEADOW.goal()); assertEquals(8, Level.HEDGES.goal()); assertEquals(12, Level.RUINS.goal());
+        assertEquals(5, Level.MEADOW.goal()); assertEquals(8, Level.HEDGES.goal()); assertEquals(10, Level.RUINS.goal());
         assertTrue(Level.MEADOW.speed() < Level.HEDGES.speed());
         assertTrue(Level.HEDGES.speed() < Level.RUINS.speed());
         assertEquals(Level.HEDGES, Level.MEADOW.next()); assertEquals(Level.RUINS, Level.HEDGES.next());
         assertNull(Level.RUINS.next());
         assertTrue(Level.MEADOW.obstacles(15,15).isEmpty());
         assertEquals(12,Level.HEDGES.obstacles(15,15).size());
-        assertEquals(24,Level.RUINS.obstacles(15,15).size());
+        assertEquals(16,Level.RUINS.obstacles(15,15).size());
+    }
+
+
+    @Test void ruinsHasWideHorizontalAndVerticalEscapeLanes() {
+        var obstacles=Level.RUINS.obstacles(15,15);
+        for(int y=5;y<=9;y++)for(int x=0;x<15;x++)
+            assertFalse(obstacles.contains(new Point(x,y)),"Five-row center corridor stays clear");
+        for(int x=6;x<=8;x++)for(int y=0;y<15;y++)
+            assertFalse(obstacles.contains(new Point(x,y)),"Three-column vertical escape lane stays clear");
+        assertTrue(Level.RUINS.speed()<=9,"Final level should allow time to react");
     }
 
     @ParameterizedTest @EnumSource(Level.class)
