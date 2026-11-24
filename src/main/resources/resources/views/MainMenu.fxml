@@ -21,6 +21,7 @@
         <ChoiceBox fx:id="levelPicker" layoutX="155" layoutY="335" prefWidth="300" accessibleText="Starting level" />
         <Label fx:id="levelDescription" layoutX="155" layoutY="380" prefWidth="320" prefHeight="60" wrapText="true" style="-fx-font-family: Arial; -fx-font-size: 14;" />
         <VBox fx:id="leaderboardContainer" layoutX="550" layoutY="110" prefWidth="260" />
+        <Button fx:id="musicButton" layoutX="550" layoutY="410" />
         <Button fx:id="btn_start" layoutY="465.0" minHeight="40.0" minWidth="115.0" mnemonicParsing="false" onAction="#handleStart" prefHeight="40.0" prefWidth="115.0" styleClass="startAndQuitBtn" text="Start" textFill="WHITE" AnchorPane.leftAnchor="217.5" />
     </children>
 </AnchorPane>

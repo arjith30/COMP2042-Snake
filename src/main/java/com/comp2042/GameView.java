@@ -18,7 +18,7 @@ public class GameView {
     public Canvas gridCanvas;
     public GraphicsContext gc;
     public Label gameOverLabel, gameWonLabel, scoreLabel, hintLabel, levelLabel;
-    public Button tryAgainButton, menuButton, fullscreenButton, nextLevelButton;
+    public Button tryAgainButton, menuButton, fullscreenButton, nextLevelButton, musicButton;
     public VBox endPanel;
     private LeaderboardView leaderboard;
     private Label endMessage;
@@ -43,10 +43,14 @@ public class GameView {
         gameWonLabel.setVisible(false); gameWonLabel.setManaged(false);
         scoreLabel = new Label(); scoreLabel.setId("scoreLabel");
         levelLabel = new Label(); levelLabel.setId("levelLabel");
-        hintLabel = new Label("WASD / arrows  •  P pause  •  F11 fullscreen");
+        levelLabel.setMinWidth(javafx.scene.layout.Region.USE_PREF_SIZE);
+        hintLabel = new Label("WASD / arrows  •  P pause");
         hintLabel.setId("hintLabel");
+        musicButton = new Button(); musicButton.setId("musicButton");
         fullscreenButton = new Button("Fullscreen"); fullscreenButton.setId("fullscreenButton");
         fullscreenButton.setFocusTraversable(false);
+        fullscreenButton.setMinWidth(javafx.scene.layout.Region.USE_PREF_SIZE);
+        fullscreenButton.setTooltip(new javafx.scene.control.Tooltip("F11: toggle fullscreen; Esc: leave fullscreen"));
         tryAgainButton = new Button("Try Again"); tryAgainButton.setId("tryAgainButton");
         menuButton = new Button("Menu / Levels"); menuButton.setId("chooseSkinButton");
         nextLevelButton = new Button("Next Level"); nextLevelButton.setId("nextLevelButton");
@@ -105,24 +109,13 @@ public class GameView {
     private void drawGrid(Coin apple, Snake snake, GraphicsContext context) {
         displayedApple = apple; displayedSnake = snake;
         double tile = game.getMultiplier() * fullScale;
-        drawGrass(context, game.getWidth(), game.getHeight(), tile);
+        BoardBackground.draw(context, game.getLevel(), game.getWidth(), game.getHeight(), tile);
         context.drawImage(apple.getImage(), apple.getPos().x * tile, apple.getPos().y * tile, tile, tile);
         skin.drawSnake(context, snake, tile);
     }
 
     public static void drawGrass(GraphicsContext g, int columns, int rows, double tile) {
-        for (int y = 0; y < rows; y++) for (int x = 0; x < columns; x++) {
-            g.setFill(Color.web((x + y) % 2 == 0 ? "#a3d56b" : "#98cb60"));
-            double left = Math.round(x * tile), top = Math.round(y * tile);
-            g.fillRect(left, top, Math.round((x + 1) * tile) - left, Math.round((y + 1) * tile) - top);
-            // Deterministic sparse tufts stay still while the snake moves.
-            if ((x * 7 + y * 11) % 5 == 0) {
-                double px = (x + .23) * tile, py = (y + .78) * tile;
-                g.setStroke(Color.web("#6ba64b", .36)); g.setLineWidth(Math.max(1, tile * .035));
-                g.strokeLine(px, py, px - tile * .07, py - tile * .12);
-                g.strokeLine(px, py, px + tile * .05, py - tile * .16);
-            }
-        }
+        BoardBackground.draw(g, Level.MEADOW, columns, rows, tile);
     }
 
     public void gameOver(Snake snake) {
@@ -143,7 +136,7 @@ public class GameView {
         tryAgainButton.setText(continuing ? "Restart Adventure" : "Try Again");
         if (show) {
             endMessage.setText("Score: " + game.getScorePoints() + "  •  Total apples: " + game.getScore());
-            hintLabel.setText(continuing ? "Enter for next level  •  R to restart" : "Enter to try again  •  Esc for levels");
+            hintLabel.setText(continuing ? "Enter: next level" : "Enter: retry  •  Esc: menu");
         }
     }
     public void refreshLeaderboard() {
@@ -154,5 +147,5 @@ public class GameView {
         scoreLabel.setText("Score: " + game.getScorePoints());
         levelLabel.setText(game.getLevel() + "  •  " + game.getLevelApples() + "/" + game.getLevel().goal() + " apples");
     }
-    public void showReady() { hintLabel.setText("WASD / arrows  •  P pause  •  F11 fullscreen"); }
+    public void showReady() { hintLabel.setText("WASD / arrows  •  P pause"); }
 }

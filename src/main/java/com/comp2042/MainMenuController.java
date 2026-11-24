@@ -18,6 +18,7 @@ public class MainMenuController {
 
     @FXML private ChoiceBox<SnakeSkin> skinPicker;
     @FXML private Canvas skinPreview;
+    @FXML private javafx.scene.control.Button musicButton;
     @FXML private ChoiceBox<Level> levelPicker;
     @FXML private javafx.scene.control.Label levelDescription;
     @FXML private javafx.scene.layout.VBox leaderboardContainer;
@@ -25,6 +26,7 @@ public class MainMenuController {
 
     @FXML
     private void initialize() {
+        viewManager.configureMusicButton(musicButton);
         leaderboard = new LeaderboardView();
         leaderboardContainer.getChildren().add(leaderboard);
         skinPicker.getItems().setAll(SnakeSkin.values());
@@ -80,9 +82,10 @@ public class MainMenuController {
         gameScene.setOnKeyPressed(controller::handle);
 
         gameView.makeScene(gameScene, snek, coin);
+        viewManager.configureMusicButton(gameView.musicButton);
         gameView.drawGrid(coin, snek, obstacle, gameView.gc, false, 0);
         gameScene.getStylesheets().add("resources/views/styling.css");
-        javafx.scene.layout.HBox hud = new javafx.scene.layout.HBox(12, new javafx.scene.layout.VBox(0, gameView.levelLabel, gameView.scoreLabel), gameView.hintLabel, gameView.fullscreenButton);
+        javafx.scene.layout.HBox hud = new javafx.scene.layout.HBox(12, new javafx.scene.layout.VBox(0, gameView.levelLabel, gameView.scoreLabel), gameView.hintLabel, gameView.musicButton, gameView.fullscreenButton);
         hud.setAlignment(Pos.CENTER); hud.setPrefHeight(56); hud.setId("gameHud");
         javafx.scene.layout.HBox.setHgrow(gameView.hintLabel, javafx.scene.layout.Priority.ALWAYS);
         gameView.hintLabel.setMinWidth(0);

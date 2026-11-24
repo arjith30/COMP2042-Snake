@@ -63,6 +63,10 @@ public class GameController {
             else restart();
             event.consume(); return;
         }
+        if (pressed == KeyCode.M) {
+            if (Main.getViewManager() != null) Main.getViewManager().getMusic().toggleMuted();
+            event.consume(); return;
+        }
         if (pressed == KeyCode.F11) {
             toggleFullscreen(); event.consume(); return;
         }
@@ -80,13 +84,13 @@ public class GameController {
         }
         if (snek.isDead() || game.isLevelComplete()) return;
         if (pressed == KeyCode.P) {
-            animation.pause(); gameView.hintLabel.setText("Paused  •  WASD or arrows to resume");
+            animation.pause(); gameView.hintLabel.setText("Paused  •  Move to resume");
         }
         if (pressed.isArrowKey()) {
             if (!keyPressed && validDirection(pressed)) {
                 lastKey = key; key = pressed; keyPressed = true;
             }
-            animation.play(); gameView.hintLabel.setText("Collect apples!  •  P to pause  •  R to restart");
+            animation.play(); gameView.hintLabel.setText("P pause  •  R restart");
             event.consume();
         }
     }
