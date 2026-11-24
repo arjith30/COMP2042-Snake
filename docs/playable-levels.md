@@ -6,7 +6,7 @@ This extension changes how the game is played: players navigate different layout
 | --- | ---: | ---: | --- |
 | Open Meadow | 5 apples | 7 | Open board |
 | Hedge Gates | 8 apples | 8.5 | 12 hedge cells with wide gates |
-| Garden Ruins | 12 apples | 10.5 | 24 stone cells forming passages |
+| Garden Ruins | 10 apples | 9 | 16 stone cells with wider passages |
 
 Choose a skin and starting level in the menu. Starting at Meadow plays the complete adventure; selecting a later level is a shorter practice route through that challenge and its successors. Obstacles and board boundaries cause a loss on contact.
 
@@ -16,7 +16,7 @@ Choose a skin and starting level in the menu. Starting at Meadow plays the compl
 
 - Collect the current goal; movement pauses automatically on the clear screen.
 - Press Enter or Next Level to continue. The new level starts with a four-cell snake, its correct obstacles and speed, and a fresh apple.
-- Adventure points carry forward: 25 after Meadow, 65 after Hedges, 125 after Ruins when playing the full sequence. Each apple is worth five points.
+- Adventure points carry forward: 25 after Meadow, 65 after Hedges, 115 after Ruins when playing the full sequence. Each apple is worth five points.
 - The final clear screen is a victory, with no Next Level button. Enter retries.
 - Try Again, R and Tab restart from the originally selected starting level with zero points. This deliberately differs from continuing, which preserves score.
 - The leaderboard receives one cumulative score when the player dies or completes the final level. Intermediate clears, unfinished abandonment and retry actions do not submit duplicate/partial entries.
@@ -44,14 +44,14 @@ Choose a skin and starting level in the menu. Starting at Meadow plays the compl
 
 Run `bash ./mvnw clean verify`.
 
-32 new JUnit cases extend the existing 45 to **77**:
+33 level-related JUnit cases plus 11 audio cases extend the original 45 to **89**:
 
-- `LevelTest` (10): goal/speed/order, uniqueness/bounds, clear spawn corridor, independent layouts, supported dimensions and flood-fill reachability.
+- `LevelTest` (11): goal/speed/order, uniqueness/bounds, clear spawn corridor, independent layouts, supported dimensions and flood-fill reachability.
 - `LevelProgressTest` (9): thresholds, skip prevention, score retention, terminal victory and restoring any selected starting level.
 - `FoodSpawnerTest` (7): exclusion of body/head/obstacles in every level, full/nearly-full boards, deterministic randomness and invalid inputs.
 - `PlayableLevelsTest` (6): reset, changing speed/layout without losing points, defensive copies and invalid game setup.
 
-The separate headless JavaFX check uses the actual menu and drives movement with controlled apple positions. It completes all three levels, checks the 125-point total, Enter and button transitions, fresh snake/food/layout state, no intermediate leaderboard submissions, no duplicate final submission, obstacle deaths, retry from every selected starting level, all five skins and fullscreen/Esc. Rendered screens were visually inspected. This development smoke check is supplementary and is not counted as a JUnit case.
+The separate headless JavaFX check uses the actual menu and drives movement with controlled apple positions. It completes all three levels, checks the 115-point total, Enter and button transitions, fresh snake/food/layout state, no intermediate leaderboard submissions, no duplicate final submission, obstacle deaths, retry from every selected starting level, all five skins and fullscreen/Esc. Rendered screens were visually inspected. This development smoke check is supplementary and is not counted as a JUnit case.
 
 ## Manual acceptance checklist
 
@@ -65,3 +65,9 @@ Not yet completed on native Windows:
 6. Test WASD/arrows, pause/resume, all skins and fullscreen; close/reopen to check leaderboard persistence.
 
 For Q&A, explain the difference between restarting an adventure and continuing to the next level, why static layout connectivity is tested, and why bounded food selection is safer than retrying random cells forever.
+
+## Playability revision
+
+Following player feedback, Garden Ruins has been reduced from 12 apples / 10.5 steps per second / 24 stones to 10 apples / 9 steps per second / 16 stones. Its horizontal passage is five rows wide and the central vertical route is three columns wide. Regression tests enforce these clear lanes while retaining flood-fill connectivity checks. The complete adventure now totals 23 apples and 115 points.
+
+Each level now also has a distinct background. See [music-and-themes.md](music-and-themes.md) for the scene and music changes.

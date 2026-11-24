@@ -31,9 +31,9 @@ class LevelProgressTest {
         assertEquals(0,progress.levelApples());assertEquals(25,progress.points());
         for(int i=0;i<8;i++)progress.collectApple();
         assertTrue(progress.advance());assertEquals(Level.RUINS,progress.level());assertEquals(65,progress.points());
-        for(int i=0;i<12;i++)progress.collectApple();
-        assertTrue(progress.isAdventureComplete());assertEquals(25,progress.totalApples());assertEquals(125,progress.points());
-        assertFalse(progress.advance());assertEquals(125,progress.points());
+        for(int i=0;i<10;i++)progress.collectApple();
+        assertTrue(progress.isAdventureComplete());assertEquals(23,progress.totalApples());assertEquals(115,progress.points());
+        assertFalse(progress.advance());assertEquals(115,progress.points());
     }
 
     @ParameterizedTest @EnumSource(Level.class)

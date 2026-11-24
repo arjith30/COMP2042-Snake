@@ -8,7 +8,7 @@ import java.util.List;
 public enum Level {
     MEADOW("1 · Open Meadow", "Collect 5 apples. Learn the route on an open field.", 5, 7),
     HEDGES("2 · Hedge Gates", "Collect 8 apples. Navigate two hedges through wide gates.", 8, 8.5),
-    RUINS("3 · Garden Ruins", "Collect 12 apples. Master narrow passages at higher speed.", 12, 10.5);
+    RUINS("3 · Garden Ruins", "Collect 10 apples. Explore wider stone passages at a gentle pace.", 10, 9);
 
     private final String title;
     private final String description;
@@ -48,10 +48,10 @@ public enum Level {
         } else if (this == RUINS) {
             for (int x : new int[]{cx - 4, cx + 4})
                 for (int offset = -5; offset <= 5; offset++)
-                    if (Math.abs(offset) >= 2) cells.add(new Point(x, cy + offset));
+                    if (Math.abs(offset) >= 3) cells.add(new Point(x, cy + offset));
             for (int y : new int[]{cy - 4, cy + 4})
                 for (int offset = -2; offset <= 2; offset++)
-                    if (offset != 0) cells.add(new Point(cx + offset, y));
+                    if (Math.abs(offset) == 2) cells.add(new Point(cx + offset, y));
         }
         return cells;
     }
